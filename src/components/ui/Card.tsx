@@ -44,7 +44,7 @@ export default function Card({
   const classes = `gx-glass ${paddingClasses[padding]} ${shadowClasses[shadow]} ${roundedClasses[rounded]} ${hoverClass} ${className}`;
   
   return (
-    <div className={classes} dir="rtl">
+    <div className={classes}>
       {children}
     </div>
   );

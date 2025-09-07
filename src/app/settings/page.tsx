@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Card, Button, Input, Badge } from '../../components/ui';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface UserProfile {
@@ -93,19 +92,19 @@ export default function SettingsPage() {
   return (
     <ContentArea className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 items-center sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-center sm:text-right">
           <h1 className="text-3xl font-bold gx-gradient-text">تنظیمات</h1>
           <p className="text-gray-400 mt-1">مدیریت حساب کاربری و تنظیمات شخصی</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-2 items-center w-full sm:flex-row sm:items-center sm:gap-4 sm:w-auto">
           {saveStatus === 'success' && (
-            <Badge variant="success">✅ ذخیره شد</Badge>
+            <Badge variant="success" className="w-full sm:w-auto text-center">✅ ذخیره شد</Badge>
           )}
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="btn-primary btn-wave"
+            className="btn-primary btn-wave w-full sm:w-auto"
           >
             {isSaving ? (
               <>
@@ -473,8 +472,6 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-
-      <Footer />
     </ContentArea>
   );
 }

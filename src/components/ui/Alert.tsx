@@ -63,7 +63,7 @@ export default function Alert({
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
   
   return (
-    <div className={classes} dir="rtl">
+    <div className={classes}>
       <div className="flex">
         <div className="flex-shrink-0">
           <div className={iconClasses[variant]}>

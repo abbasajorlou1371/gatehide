@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface Gamenet {
@@ -261,10 +260,10 @@ export default function GamenetsPage() {
 
 
   return (
-    <ContentArea className="space-y-4 sm:space-y-6" overflow="hidden">
+    <ContentArea className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-4">
+        <div className="w-full sm:flex-1 text-center sm:text-right">
           <h1 className="text-2xl sm:text-3xl font-bold gx-gradient-text">مدیریت گیم نت‌ها</h1>
           <p className="text-gray-400 mt-1 text-sm sm:text-base">مدیریت و نظارت بر گیم نت‌های تحت پوشش</p>
         </div>
@@ -272,7 +271,7 @@ export default function GamenetsPage() {
           onClick={handleAddGamenet}
           variant="primary"
           size="md"
-          className="btn-wave w-full sm:w-auto"
+          className="btn-wave w-full sm:w-auto text-center sm:text-right"
         >
           <span className="sm:hidden">➕ افزودن</span>
           <span className="hidden sm:inline">➕ افزودن گیم نت</span>
@@ -280,7 +279,7 @@ export default function GamenetsPage() {
       </div>
 
       {/* Stats */}
-      <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
+      <div className="flex flex-row items-center justify-center sm:justify-start gap-2 sm:gap-4 w-full sm:w-auto">
         <Badge variant="primary" size="md">
           📊 {gamenets.length} گیم نت
         </Badge>
@@ -426,8 +425,6 @@ export default function GamenetsPage() {
           </p>
         </div>
       </Modal>
-
-      <Footer />
     </ContentArea>
   );
 }

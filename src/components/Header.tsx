@@ -1,18 +1,103 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui';
+import Link from 'next/link';
 
 interface HeaderProps {
   onMenuToggle: () => void;
   isMenuOpen: boolean;
 }
 
-export default function Header({ onMenuToggle }: HeaderProps) {
+// Mock user data (replace with real user data from context/auth)
+const user = {
+  name: 'علی رضایی',
+  image: 'https://i.pravatar.cc/40?img=3'
+};
 
+function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
+  useEffect(() => {
+    function listener(event: MouseEvent) {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return;
+      }
+      handler();
+    }
+    document.addEventListener('mousedown', listener);
+    return () => {
+      document.removeEventListener('mousedown', listener);
+    };
+  }, [ref, handler]);
+}
+
+function UserDropdown() {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(dropdownRef, () => setOpen(false));
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        <img
+          src={user.image}
+          alt={user.name}
+          className="w-8 h-8 rounded-full border border-gray-500"
+        />
+        <span className="font-medium text-white text-sm">{user.name}</span>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute left-0 mt-2 w-44 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50 py-2 animate-fade-in">
+          <button
+            className="w-full text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+            onClick={() => {
+              setOpen(false);
+              // TODO: Implement change password navigation
+            }}
+          >
+            تغییر رمز عبور
+          </button>
+          <Link
+            href="/wallet"
+            className="w-full block text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+            onClick={() => setOpen(false)}
+          >
+            کیف پول
+          </Link>
+          <button
+            className="w-full text-right px-4 py-2 text-sm text-white transition-colors"
+            onClick={() => {
+              setOpen(false);
+              // TODO: Implement logout logic
+            }}
+          >
+            خروج
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Header({ onMenuToggle }: HeaderProps) {
   return (
     <header className="gx-glass shadow-md border-b border-gray-600 z-50 flex-shrink-0 w-full">
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16" dir="rtl">
+        <div className="flex justify-between items-center h-16">
           {/* Menu Button */}
           <button
             onClick={onMenuToggle}
@@ -42,9 +127,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
-                <Button variant="primary" size="sm" className="btn-wave">
-                  ورود
-                </Button>
+            <UserDropdown />
           </div>
         </div>
       </div>

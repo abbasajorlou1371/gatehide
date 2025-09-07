@@ -16,7 +16,7 @@ export interface TableAction<T> {
   label: string;
   icon?: string;
   onClick: (item: T) => void;
-  variant?: 'primary' | 'secondary' | 'danger' | 'warning';
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost';
   className?: string;
 }
 
@@ -149,15 +149,15 @@ export default function Table<T extends Record<string, any>>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+        <table className="w-full min-w-max">
           <thead>
             <tr className="border-b border-gray-700/50">
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
-                  className={`px-4 py-3 text-right text-sm font-medium text-gray-300 ${column.className || ''}`}
-                  style={{ width: column.width }}
+                  className={`px-4 py-3 text-right text-sm font-medium text-gray-300 whitespace-nowrap ${column.className || ''}`}
+                  style={{ width: column.width, minWidth: column.width || '120px' }}
                 >
                   <div className="flex items-center gap-2">
                     <span>{column.label}</span>
@@ -173,7 +173,7 @@ export default function Table<T extends Record<string, any>>({
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-4 py-3 text-right text-sm font-medium text-gray-300">
+                <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 whitespace-nowrap min-w-[120px]">
                   عملیات
                 </th>
               )}
@@ -201,13 +201,13 @@ export default function Table<T extends Record<string, any>>({
                   {columns.map((column) => (
                     <td
                       key={String(column.key)}
-                      className={`px-4 py-3 text-sm text-gray-200 ${column.className || ''}`}
+                      className={`px-4 py-3 text-sm text-gray-200 whitespace-nowrap ${column.className || ''}`}
                     >
                       {renderCellValue(column, item)}
                     </td>
                   ))}
                   {actions.length > 0 && (
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {actions.map((action, actionIndex) => (
                           <Button

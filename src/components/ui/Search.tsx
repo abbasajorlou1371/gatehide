@@ -106,7 +106,6 @@ export default function Search({
           ${value && showClearButton ? 'pl-10' : 'pl-3'}
           pr-10
         `}
-        dir="rtl"
       />
     </div>
   );

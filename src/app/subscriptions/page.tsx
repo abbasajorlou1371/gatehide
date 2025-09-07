@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface SubscriptionPlan {
@@ -379,7 +378,6 @@ export default function SubscriptionsPage() {
                 placeholder="نام پلن را وارد کنید"
                 required
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-                dir="rtl"
               />
             </div>
             
@@ -394,7 +392,6 @@ export default function SubscriptionsPage() {
                 required
                 min="0"
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-                dir="ltr"
               />
             </div>
           </div>
@@ -409,7 +406,6 @@ export default function SubscriptionsPage() {
               required
               rows={3}
               className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-              dir="rtl"
             />
           </div>
           
@@ -425,7 +421,6 @@ export default function SubscriptionsPage() {
                 required
                 min="1"
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-                dir="ltr"
               />
             </div>
             
@@ -453,7 +448,6 @@ export default function SubscriptionsPage() {
               required
               rows={4}
               className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-              dir="rtl"
             />
           </div>
           
@@ -512,7 +506,6 @@ export default function SubscriptionsPage() {
         </div>
       </Modal>
 
-      <Footer />
     </ContentArea>
   );
 }

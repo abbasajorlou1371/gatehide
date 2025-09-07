@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from './ui';
@@ -8,13 +8,116 @@ import { Button } from './ui';
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpen?: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
   // Mock authentication state - replace with actual auth logic
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isFinancialOpen, setIsFinancialOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
+  
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Set client-side flag to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Minimum distance for swipe detection
+  const minSwipeDistance = 50;
+
+  // Handle touch start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  // Handle touch move
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  // Handle touch end and detect swipe
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Swipe right to close sidebar (when open)
+    if (isRightSwipe && isOpen) {
+      onClose();
+    }
+    
+    // Reset touch state
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  // Add global touch event listeners for swipe detection
+  useEffect(() => {
+    if (!isClient) return;
+
+    const handleGlobalTouchStart = (e: TouchEvent) => {
+      // Handle edge swipes when sidebar is closed
+      if (!isOpen && e.touches[0].clientX > window.innerWidth - 30) {
+        setTouchStart(e.touches[0].clientX);
+        setTouchEnd(null);
+      }
+      // Handle swipes when sidebar is open (for closing)
+      else if (isOpen) {
+        setTouchStart(e.touches[0].clientX);
+        setTouchEnd(null);
+      }
+    };
+
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (touchStart !== null) {
+        setTouchEnd(e.touches[0].clientX);
+      }
+    };
+
+    const handleGlobalTouchEnd = () => {
+      if (!touchStart || !touchEnd) return;
+      
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+      
+      if (!isOpen) {
+        // Swipe from right edge to open sidebar
+        if (isLeftSwipe && touchStart > window.innerWidth - 50 && onOpen) {
+          onOpen();
+        }
+      } else {
+        // Swipe right to close sidebar from anywhere on screen
+        if (isRightSwipe) {
+          onClose();
+        }
+      }
+      
+      setTouchStart(null);
+      setTouchEnd(null);
+    };
+
+    // Add event listeners
+    document.addEventListener('touchstart', handleGlobalTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: true });
+    document.addEventListener('touchend', handleGlobalTouchEnd, { passive: true });
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('touchstart', handleGlobalTouchStart);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isClient, isOpen, touchStart, touchEnd, onOpen, onClose]);
 
   const menuItems: Array<{
     name: string;
@@ -27,6 +130,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }> = [
     { name: 'داشبورد', href: '/', icon: '📊' },
     { name: 'گیم نت‌ها', href: '/gamenets', icon: '🎮' },
+    { name: 'رزرو دستگاه‌ها', href: '/reservation', icon: '💻' },
+    { name: 'کاربران', href: '/users', icon: '👥' },
     { name: 'پلن‌های اشتراک', href: '/subscriptions', icon: '📋' },
     { 
       name: 'امور مالی', 
@@ -35,6 +140,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       isOpen: isFinancialOpen,
       onToggle: () => setIsFinancialOpen(!isFinancialOpen),
       children: [
+        { name: 'کیف پول', href: '/wallet', icon: '💎' },
         { name: 'پرداخت‌ها', href: '/payments', icon: '💳' },
         { name: 'تراکنش‌ها', href: '/transactions', icon: '📈' },
       ]
@@ -61,32 +167,44 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const isFinancialActive = () => {
-    return pathname.startsWith('/payments') || pathname.startsWith('/transactions');
+    return pathname.startsWith('/wallet') || pathname.startsWith('/payments') || pathname.startsWith('/transactions');
   };
 
   return (
     <>
+      {/* Swipe indicator when sidebar is closed */}
+      {!isOpen && (
+        <div className="fixed top-1/2 right-0 z-40 w-2 h-16 bg-gradient-to-l from-purple-500/30 to-transparent rounded-l-lg lg:hidden transform -translate-y-1/2" />
+      )}
+
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-80 lg:hidden"
+          className="fixed inset-0 z-[55] bg-black bg-opacity-80 lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 gx-glass shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-10 ${
+        ref={sidebarRef}
+        className={`fixed top-0 right-0 z-[60] h-full w-64 gx-glass shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-10 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
-        <div className="flex h-full flex-col" dir="rtl">
+        <div className="flex h-full flex-col">
           {/* Sidebar Header with Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-600">
-            <h1 className="sm:block text-xl font-bold gx-gradient-text">🎮 GateHide</h1>
+            <Link href="/" className="sm:block text-xl font-bold gx-gradient-text">
+              🎮 GateHide
+            </Link>
             <button
               onClick={onClose}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800"
+              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
+              aria-label="بستن منو"
             >
               <svg
                 className="h-6 w-6"
@@ -106,7 +224,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation (scrollable) */}
-          <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto scrollbar-thin">
             {menuItems.map((item) => {
               if (item.hasDropdown) {
                 const isActive = isFinancialActive();
@@ -157,7 +275,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                               }`}
                               onClick={() => {
                                 // Close mobile sidebar when navigating
-                                if (window.innerWidth < 1024) {
+                                if (isClient && window.innerWidth < 1024) {
                                   onClose();
                                 }
                               }}
@@ -184,7 +302,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     }`}
                     onClick={() => {
                       // Close mobile sidebar when navigating
-                      if (window.innerWidth < 1024) {
+                      if (isClient && window.innerWidth < 1024) {
                         onClose();
                       }
                     }}

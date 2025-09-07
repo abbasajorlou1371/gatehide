@@ -42,7 +42,6 @@ export default function Button({
     <button
       className={classes}
       disabled={disabled || loading}
-      dir="rtl"
       {...props}
     >
       {loading && (

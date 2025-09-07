@@ -19,7 +19,7 @@ export default function ContentArea({
 }: ContentAreaProps) {
   const paddingClasses = {
     none: '',
-    sm: 'p-2 sm:p-4',
+    sm: 'p-3 sm:p-4',
     md: 'p-4 sm:p-6',
     lg: 'p-6 sm:p-8'
   };
@@ -49,7 +49,7 @@ export default function ContentArea({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={combinedClasses} dir="rtl">
+    <div className={`${combinedClasses} overflow-hidden`}>
       {children}
     </div>
   );

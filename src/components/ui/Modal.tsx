@@ -79,13 +79,35 @@ export default function Modal({
     <>
       {/* Modal backdrop */}
       <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-md transition-opacity z-40"
+        className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full bg-black/70 backdrop-blur-md transition-opacity z-40"
         onClick={onClose}
         aria-hidden="true"
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 40
+        }}
       />
       
       {/* Modal container */}
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div 
+        className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full flex items-center justify-center z-50 p-4"
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 50
+        }}
+      >
         {/* Modal content */}
         <div 
           ref={modalRef}
@@ -96,7 +118,6 @@ export default function Modal({
           aria-modal="true"
           aria-labelledby={title ? "modal-title" : undefined}
           tabIndex={-1}
-          dir="rtl"
         >
           {/* Modal header */}
           {(title || showCloseButton) && (

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface Payment {
@@ -374,14 +373,14 @@ export default function PaymentsPage() {
       key: 'paymentMethod',
       label: 'روش پرداخت',
       sortable: true,
-      render: (value) => {
-        const methodLabels = {
+      render: (value: string) => {
+        const methodLabels: Record<string, string> = {
           cash: 'نقدی',
           card: 'کارت',
           online: 'آنلاین',
           crypto: 'کریپتو'
         };
-        const methodIcons = {
+        const methodIcons: Record<string, string> = {
           cash: '💵',
           card: '💳',
           online: '🌐',
@@ -389,8 +388,8 @@ export default function PaymentsPage() {
         };
         return (
           <div className="flex items-center gap-2">
-            <span>{methodIcons[value]}</span>
-            <span className="text-gray-300">{methodLabels[value]}</span>
+            <span>{methodIcons[value] || '❓'}</span>
+            <span className="text-gray-300">{methodLabels[value] || value}</span>
           </div>
         );
       }
@@ -399,14 +398,14 @@ export default function PaymentsPage() {
       key: 'status',
       label: 'وضعیت',
       sortable: true,
-      render: (value) => {
-        const statusConfig = {
-          pending: { label: 'در انتظار', variant: 'warning' as const, icon: '⏳' },
-          completed: { label: 'تکمیل شده', variant: 'success' as const, icon: '✅' },
-          failed: { label: 'ناموفق', variant: 'danger' as const, icon: '❌' },
-          refunded: { label: 'برگشت', variant: 'secondary' as const, icon: '↩️' }
+      render: (value: string) => {
+        const statusConfig: Record<string, { label: string; variant: 'warning' | 'success' | 'danger' | 'secondary'; icon: string }> = {
+          pending: { label: 'در انتظار', variant: 'warning', icon: '⏳' },
+          completed: { label: 'تکمیل شده', variant: 'success', icon: '✅' },
+          failed: { label: 'ناموفق', variant: 'danger', icon: '❌' },
+          refunded: { label: 'برگشت', variant: 'secondary', icon: '↩️' }
         };
-        const config = statusConfig[value];
+        const config = statusConfig[value] || { label: value, variant: 'secondary' as const, icon: '❓' };
         return (
           <Badge variant={config.variant}>
             <span className="ml-1">{config.icon}</span>
@@ -507,10 +506,7 @@ export default function PaymentsPage() {
         totalItems={filteredPayments.length}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
-      />
-
-
-      <Footer />
+      />  
     </ContentArea>
   );
 }

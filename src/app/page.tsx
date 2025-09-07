@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Footer from "../components/Footer";
 import ContentArea from "../components/ContentArea";
 import { Card, Badge } from "../components/ui";
 
@@ -66,89 +65,89 @@ export default function Dashboard() {
   }, [isLoaded, totalPlayers, totalRevenue, activeServers]);
 
   return (
-    <ContentArea className="space-y-6">
+    <ContentArea className="space-y-6 overflow-hidden">
       {/* Dashboard Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold gx-gradient-text">داشبورد گیم نت</h1>
-          <p className="text-gray-400 mt-1">مدیریت شبکه بازی و آمار بازیکنان</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 w-full sm:w-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold gx-gradient-text text-center sm:text-right w-full sm:w-auto">داشبورد گیم نت</h1>
+          <p className="text-gray-400 text-sm sm:text-base text-center sm:text-right w-full sm:w-auto">مدیریت شبکه بازی و آمار بازیکنان</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Badge variant="success" size="lg">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 justify-center sm:justify-end w-full sm:w-auto">
+          <Badge variant="success" size="md" className="text-xs sm:text-sm">
             🟢 {activeServers} سرور فعال
           </Badge>
-          <Badge variant="primary" size="lg">
+          <Badge variant="primary" size="md" className="text-xs sm:text-sm">
             ⚡ {serverUptime}% آپتایم
           </Badge>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Total Players Card */}
         <Card hover className="gx-neon card-wave">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">کل بازیکنان</p>
-              <p className="text-3xl font-bold text-purple-400 mt-2">{animatedStats.players.toLocaleString()}</p>
-              <p className="text-green-400 text-sm mt-1">+{newPlayersThisMonth} این ماه</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm">کل بازیکنان</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-400 mt-1 sm:mt-2 truncate">{animatedStats.players.toLocaleString()}</p>
+              <p className="text-green-400 text-xs sm:text-sm mt-1">+{newPlayersThisMonth} این ماه</p>
             </div>
-            <div className="text-4xl icon-wave">🎮</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl icon-wave flex-shrink-0">🎮</div>
           </div>
         </Card>
 
         {/* Total Revenue Card */}
         <Card hover className="gx-neon card-wave">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">کل درآمد</p>
-              <p className="text-3xl font-bold text-cyan-400 mt-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm">کل درآمد</p>
+              <p className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold text-cyan-400 mt-1 sm:mt-2 truncate">
                 {animatedStats.revenue.toLocaleString('fa-IR')} تومان
               </p>
-              <p className="text-green-400 text-sm mt-1">+{revenueGrowth}% رشد</p>
+              <p className="text-green-400 text-xs sm:text-sm mt-1">+{revenueGrowth}% رشد</p>
             </div>
-            <div className="text-4xl icon-wave">💰</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl icon-wave flex-shrink-0">💰</div>
           </div>
         </Card>
 
         {/* Active Servers Card */}
         <Card hover className="gx-neon card-wave">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">سرورهای فعال</p>
-              <p className="text-3xl font-bold text-blue-400 mt-2">{animatedStats.servers}</p>
-              <p className="text-yellow-400 text-sm mt-1">{serverUptime}% آپتایم</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm">سرورهای فعال</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-400 mt-1 sm:mt-2">{animatedStats.servers}</p>
+              <p className="text-yellow-400 text-xs sm:text-sm mt-1">{serverUptime}% آپتایم</p>
             </div>
-            <div className="text-4xl icon-wave">🖥️</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl icon-wave flex-shrink-0">🖥️</div>
           </div>
         </Card>
 
         {/* Online Players Card */}
         <Card hover className="gx-neon card-wave">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">بازیکنان آنلاین</p>
-              <p className="text-3xl font-bold text-green-400 mt-2">{animatedStats.onlinePlayers.toLocaleString()}</p>
-              <p className="text-blue-400 text-sm mt-1">53% از کل</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm">بازیکنان آنلاین</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-400 mt-1 sm:mt-2 truncate">{animatedStats.onlinePlayers.toLocaleString()}</p>
+              <p className="text-blue-400 text-xs sm:text-sm mt-1">53% از کل</p>
             </div>
-            <div className="text-4xl icon-wave">👥</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl icon-wave flex-shrink-0">👥</div>
           </div>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Players Growth Chart */}
         <Card className="gx-neon">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-purple-300">رشد بازیکنان</h3>
-            <Badge variant="primary">6 ماه گذشته</Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-purple-300">رشد بازیکنان</h3>
+            <Badge variant="primary" size="sm">6 ماه گذشته</Badge>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 overflow-hidden">
             {gamenetData.map((data, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-gray-300 text-sm w-20 text-right">{data.month}</span>
-                <div className="flex-1 mx-4">
+              <div key={index} className="flex items-center justify-between gap-2 min-w-0">
+                <span className="text-gray-300 text-xs sm:text-sm w-14 sm:w-16 text-right flex-shrink-0">{data.month}</span>
+                <div className="flex-1 mx-1 sm:mx-2 min-w-0">
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div 
                       className={`bg-gradient-to-r from-purple-500 to-purple-400 h-2 rounded-full transition-all duration-1000 ease-out chart-bar ${
@@ -161,14 +160,14 @@ export default function Dashboard() {
                     ></div>
                   </div>
                 </div>
-                <span className="text-purple-400 font-semibold w-16 text-right">
+                <span className="text-purple-400 font-semibold w-10 sm:w-12 text-right text-xs flex-shrink-0">
                   {data.players}
                 </span>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-600">
-            <div className="flex items-center justify-between text-sm">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-400">میانگین رشد ماهانه</span>
               <span className="text-green-400 font-semibold">+15.2%</span>
             </div>
@@ -177,15 +176,15 @@ export default function Dashboard() {
 
         {/* Revenue Chart */}
         <Card className="gx-neon">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-cyan-300">درآمد ماهانه</h3>
-            <Badge variant="secondary">6 ماه گذشته</Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-cyan-300">درآمد ماهانه</h3>
+            <Badge variant="secondary" size="sm">6 ماه گذشته</Badge>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 overflow-hidden">
             {gamenetData.map((data, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-gray-300 text-sm w-20 text-right">{data.month}</span>
-                <div className="flex-1 mx-4">
+              <div key={index} className="flex items-center justify-between gap-2 min-w-0">
+                <span className="text-gray-300 text-xs sm:text-sm w-14 sm:w-16 text-right flex-shrink-0">{data.month}</span>
+                <div className="flex-1 mx-1 sm:mx-2 min-w-0">
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div 
                       className={`bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 rounded-full transition-all duration-1000 ease-out chart-bar ${
@@ -198,14 +197,14 @@ export default function Dashboard() {
                     ></div>
                   </div>
                 </div>
-                <span className="text-cyan-400 font-semibold w-20 text-right text-xs">
+                <span className="text-cyan-400 font-semibold w-10 sm:w-12 text-right text-xs flex-shrink-0">
                   {(data.revenue / 1000000).toFixed(1)}M
                 </span>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-600">
-            <div className="flex items-center justify-between text-sm">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-400">میانگین رشد درآمد</span>
               <span className="text-green-400 font-semibold">+{revenueGrowth}%</span>
             </div>
@@ -214,18 +213,18 @@ export default function Dashboard() {
       </div>
 
       {/* Server Status Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Server Performance */}
         <Card className="gx-neon">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-blue-300">عملکرد سرورها</h3>
-            <Badge variant="success">همه آنلاین</Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-blue-300">عملکرد سرورها</h3>
+            <Badge variant="success" size="sm">همه آنلاین</Badge>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 overflow-hidden">
             {gamenetData.map((data, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-gray-300 text-sm w-20 text-right">{data.month}</span>
-                <div className="flex-1 mx-4">
+              <div key={index} className="flex items-center justify-between gap-2 min-w-0">
+                <span className="text-gray-300 text-xs sm:text-sm w-14 sm:w-16 text-right flex-shrink-0">{data.month}</span>
+                <div className="flex-1 mx-1 sm:mx-2 min-w-0">
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div 
                       className={`bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full transition-all duration-1000 ease-out chart-bar ${
@@ -238,14 +237,14 @@ export default function Dashboard() {
                     ></div>
                   </div>
                 </div>
-                <span className="text-blue-400 font-semibold w-16 text-left">
+                <span className="text-blue-400 font-semibold w-10 sm:w-12 text-right text-xs flex-shrink-0">
                   {data.servers}
                 </span>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-600">
-            <div className="flex items-center justify-between text-sm">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-400">میانگین آپتایم</span>
               <span className="text-green-400 font-semibold">{serverUptime}%</span>
             </div>
@@ -254,47 +253,47 @@ export default function Dashboard() {
 
         {/* Popular Games */}
         <Card className="gx-neon">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-green-300">بازی‌های محبوب</h3>
-            <Badge variant="primary">امروز</Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-green-300">بازی‌های محبوب</h3>
+            <Badge variant="primary" size="sm">امروز</Badge>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">🎯</div>
-                <div>
-                  <p className="text-white font-medium">Counter-Strike 2</p>
-                  <p className="text-gray-400 text-sm">FPS</p>
+          <div className="space-y-3 sm:space-y-4 overflow-hidden">
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="text-xl sm:text-2xl flex-shrink-0">🎯</div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white font-medium text-sm sm:text-base truncate">Counter-Strike 2</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">FPS</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-green-400 font-semibold">456</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-green-400 font-semibold text-sm sm:text-base">456</p>
                 <p className="text-gray-400 text-xs">بازیکن</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">⚔️</div>
-                <div>
-                  <p className="text-white font-medium">Dota 2</p>
-                  <p className="text-gray-400 text-sm">MOBA</p>
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="text-xl sm:text-2xl flex-shrink-0">⚔️</div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white font-medium text-sm sm:text-base truncate">Dota 2</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">MOBA</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-blue-400 font-semibold">324</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-blue-400 font-semibold text-sm sm:text-base">324</p>
                 <p className="text-gray-400 text-xs">بازیکن</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50">
-                <div className="flex items-center gap-3">
-                <div className="text-2xl">🏎️</div>
-                <div>
-                  <p className="text-white font-medium">Racing Games</p>
-                  <p className="text-gray-400 text-sm">Racing</p>
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="text-xl sm:text-2xl flex-shrink-0">🏎️</div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white font-medium text-sm sm:text-base truncate">Racing Games</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Racing</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-purple-400 font-semibold">198</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-purple-400 font-semibold text-sm sm:text-base">198</p>
                 <p className="text-gray-400 text-xs">بازیکن</p>
               </div>
             </div>
@@ -304,52 +303,50 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <Card className="gx-neon">
-        <h3 className="text-xl font-semibold text-blue-300 mb-6">فعالیت‌های اخیر گیم نت</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/50">
-            <div className="text-2xl">🎯</div>
-            <div className="flex-1">
-              <p className="text-white font-medium">سرور جدید Counter-Strike 2 راه‌اندازی شد</p>
-              <p className="text-gray-400 text-sm">2 ساعت پیش</p>
+        <h3 className="text-lg sm:text-xl font-semibold text-blue-300 mb-4 sm:mb-6">فعالیت‌های اخیر گیم نت</h3>
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+            <div className="text-xl sm:text-2xl flex-shrink-0">🎯</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm sm:text-base truncate">سرور جدید Counter-Strike 2 راه‌اندازی شد</p>
+              <p className="text-gray-400 text-xs sm:text-sm">2 ساعت پیش</p>
             </div>
-            <Badge variant="success">سرور جدید</Badge>
+            <Badge variant="success" size="sm" className="flex-shrink-0">سرور جدید</Badge>
           </div>
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/50">
-            <div className="text-2xl">👥</div>
-            <div className="flex-1">
-              <p className="text-white font-medium">25 بازیکن جدید ثبت نام کردند</p>
-              <p className="text-gray-400 text-sm">4 ساعت پیش</p>
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+            <div className="text-xl sm:text-2xl flex-shrink-0">👥</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm sm:text-base truncate">25 بازیکن جدید ثبت نام کردند</p>
+              <p className="text-gray-400 text-xs sm:text-sm">4 ساعت پیش</p>
             </div>
-            <Badge variant="primary">بازیکن جدید</Badge>
+            <Badge variant="primary" size="sm" className="flex-shrink-0">بازیکن جدید</Badge>
           </div>
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/50">
-            <div className="text-2xl">💰</div>
-            <div className="flex-1">
-              <p className="text-white font-medium">پرداخت 2,500,000 تومان از بازیکن دریافت شد</p>
-              <p className="text-gray-400 text-sm">6 ساعت پیش</p>
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+            <div className="text-xl sm:text-2xl flex-shrink-0">💰</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm sm:text-base truncate">پرداخت 2,500,000 تومان از بازیکن دریافت شد</p>
+              <p className="text-gray-400 text-xs sm:text-sm">6 ساعت پیش</p>
             </div>
-            <Badge variant="secondary">درآمد</Badge>
+            <Badge variant="secondary" size="sm" className="flex-shrink-0">درآمد</Badge>
           </div>
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/50">
-            <div className="text-2xl">🏆</div>
-            <div className="flex-1">
-              <p className="text-white font-medium">تورنمنت Dota 2 با 32 تیم شروع شد</p>
-              <p className="text-gray-400 text-sm">8 ساعت پیش</p>
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+            <div className="text-xl sm:text-2xl flex-shrink-0">🏆</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm sm:text-base truncate">تورنمنت Dota 2 با 32 تیم شروع شد</p>
+              <p className="text-gray-400 text-xs sm:text-sm">8 ساعت پیش</p>
             </div>
-            <Badge variant="warning">تورنمنت</Badge>
+            <Badge variant="warning" size="sm" className="flex-shrink-0">تورنمنت</Badge>
           </div>
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/50">
-            <div className="text-2xl">🖥️</div>
-            <div className="flex-1">
-              <p className="text-white font-medium">سرور #3 به‌روزرسانی شد</p>
-              <p className="text-gray-400 text-sm">12 ساعت پیش</p>
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg bg-gray-800/50">
+            <div className="text-xl sm:text-2xl flex-shrink-0">🖥️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm sm:text-base truncate">سرور #3 به‌روزرسانی شد</p>
+              <p className="text-gray-400 text-xs sm:text-sm">12 ساعت پیش</p>
             </div>
-            <Badge variant="primary">به‌روزرسانی</Badge>
+            <Badge variant="primary" size="sm" className="flex-shrink-0">به‌روزرسانی</Badge>
           </div>
         </div>
       </Card>
-
-      <Footer />
     </ContentArea>
   );
 }

@@ -33,7 +33,7 @@ export default function Badge({
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
   
   return (
-    <span className={classes} dir="rtl">
+    <span className={classes}>
       {children}
     </span>
   );

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Card, Button, Input, Badge } from '../../components/ui';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface ContactForm {
@@ -300,7 +299,6 @@ export default function SupportPage() {
         </div>
       </Card>
 
-      <Footer />
     </ContentArea>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
-import Footer from '../../components/Footer';
 import ContentArea from '../../components/ContentArea';
 
 interface Transaction {
@@ -340,7 +339,6 @@ export default function TransactionsPage() {
       />
 
 
-      <Footer />
     </ContentArea>
   );
 }

@@ -27,7 +27,7 @@ export default function Input({
   const inputClasses = `${baseClasses} ${errorClasses} ${widthClass} ${iconPadding} ${className}`;
   
   return (
-    <div className={`${fullWidth ? 'w-full' : ''}`} dir="rtl">
+    <div className={`${fullWidth ? 'w-full' : ''}`}>
       {label && (
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {label}

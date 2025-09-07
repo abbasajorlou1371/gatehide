@@ -70,6 +70,18 @@ body { overflow-x: hidden; }
   background: #9ca3af;
 }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* Safari and Chrome */
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Progress Bar Animations */
 @keyframes progressShimmer {
   0% {
