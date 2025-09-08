@@ -33,16 +33,6 @@ export default function NotFound() {
                 🏠 بازگشت به صفحه اصلی
               </Button>
             </Link>
-            <Link href="/gamenets">
-              <Button className="btn-ghost btn-wave w-full sm:w-auto">
-                🎮 گیم نت‌ها
-              </Button>
-            </Link>
-            <Link href="/subscriptions">
-              <Button className="btn-ghost btn-wave w-full sm:w-auto">
-                💳 اشتراک‌ها
-              </Button>
-            </Link>
           </div>
 
           {/* Help Section */}

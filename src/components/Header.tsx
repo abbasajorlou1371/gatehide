@@ -15,6 +15,9 @@ const user = {
   image: 'https://i.pravatar.cc/40?img=3'
 };
 
+// Mock authentication state (replace with real auth context)
+const isAuthenticated = false; // Set to true to show user dropdown, false to show login button
+
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
   useEffect(() => {
     function listener(event: MouseEvent) {
@@ -125,9 +128,22 @@ export default function Header({ onMenuToggle }: HeaderProps) {
           {/* Spacer when menu button hidden */}
           <div className="hidden lg:block" />
 
-          {/* User Menu */}
+          {/* User Menu / Login Button */}
           <div className="flex items-center gap-4">
-            <UserDropdown />
+            {isAuthenticated ? (
+              <UserDropdown />
+            ) : (
+              <Link href="/login">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="btn-wave"
+                >
+                  <span className="ml-1">🔑</span>
+                  ورود
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

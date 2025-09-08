@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Table, TableColumn, TableAction, Button, Badge, Modal } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import Swal from 'sweetalert2';
 
 // Device interface
 interface Device {
@@ -154,11 +155,45 @@ export default function DevicesPage() {
       setIsReservationModalOpen(false);
       setSelectedDevice(null);
       
-      // Show success message (you can implement a toast notification here)
-      alert(`دستگاه ${selectedDevice.name} با موفقیت رزرو شد!`);
+      // Show success toast
+      await Swal.fire({
+        title: 'رزرو موفق! 🎉',
+        text: `دستگاه ${selectedDevice.name} با موفقیت رزرو شد`,
+        icon: 'success',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        background: '#1f2937',
+        color: '#ffffff',
+        customClass: {
+          popup: 'swal2-popup-dark',
+          title: 'swal2-title-dark',
+          htmlContainer: 'swal2-content-dark'
+        }
+      });
     } catch (error) {
       console.error('Error reserving device:', error);
-      alert('خطا در رزرو دستگاه. لطفاً دوباره تلاش کنید.');
+      
+      // Show error toast
+      await Swal.fire({
+        title: 'خطا در رزرو! ❌',
+        text: 'خطا در رزرو دستگاه. لطفاً دوباره تلاش کنید.',
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        background: '#1f2937',
+        color: '#ffffff',
+        customClass: {
+          popup: 'swal2-popup-dark',
+          title: 'swal2-title-dark',
+          htmlContainer: 'swal2-content-dark'
+        }
+      });
     } finally {
       setReservationLoading(false);
     }

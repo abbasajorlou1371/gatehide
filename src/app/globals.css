@@ -338,3 +338,59 @@ hr { border-color: var(--border); }
 .text-gray-400, .text-gray-300, .text-gray-200 {
   color: var(--muted) !important;
 }
+
+/* SweetAlert2 Dark Theme Customization */
+.swal2-popup-dark {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 12px !important;
+}
+
+.swal2-title-dark {
+  color: #ffffff !important;
+  font-family: var(--font-vazirmatn) !important;
+}
+
+.swal2-content-dark {
+  color: #d1d5db !important;
+  font-family: var(--font-vazirmatn) !important;
+}
+
+.swal2-confirm-dark {
+  background: #7c3aed !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-family: var(--font-vazirmatn) !important;
+  font-weight: 500 !important;
+}
+
+.swal2-confirm-dark:hover {
+  background: #6d28d9 !important;
+}
+
+.swal2-cancel-dark {
+  background: #6b7280 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-family: var(--font-vazirmatn) !important;
+  font-weight: 500 !important;
+}
+
+.swal2-cancel-dark:hover {
+  background: #4b5563 !important;
+}
+
+.swal2-toast {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+.swal2-toast .swal2-title {
+  font-family: var(--font-vazirmatn) !important;
+  font-size: 16px !important;
+}
+
+.swal2-toast .swal2-content {
+  font-family: var(--font-vazirmatn) !important;
+  font-size: 14px !important;
+}

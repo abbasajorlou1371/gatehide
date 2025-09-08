@@ -133,6 +133,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
     { name: 'رزرو دستگاه‌ها', href: '/reservation', icon: '💻' },
     { name: 'کاربران', href: '/users', icon: '👥' },
     { name: 'پلن‌های اشتراک', href: '/subscriptions', icon: '📋' },
+    { name: 'آمار و تحلیل‌ها', href: '/analytics', icon: '📈' },
     { 
       name: 'امور مالی', 
       icon: '💰', 
