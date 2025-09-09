@@ -14,6 +14,24 @@ interface Device {
   isFree: boolean;
   lastSeen: string;
   location?: string;
+  reservationCount: number;
+  hourlyRate: number;
+  systemInfo: {
+    ram: string;
+    cpu: string;
+    gpu: string;
+    storage: string;
+    os: string;
+  };
+}
+
+// Reserved user interface
+interface ReservedUser {
+  id: string;
+  name: string;
+  email: string;
+  reservationTime: string;
+  duration: string;
 }
 
 // Mock data for demonstration
@@ -25,7 +43,16 @@ const mockDevices: Device[] = [
     status: 'online',
     isFree: true,
     lastSeen: '2024-01-15 14:30:00',
-    location: 'سالن A'
+    location: 'سالن A',
+    reservationCount: 5,
+    hourlyRate: 15000,
+    systemInfo: {
+      ram: '32GB DDR4',
+      cpu: 'Intel Core i9-12900K',
+      gpu: 'RTX 4080',
+      storage: '1TB NVMe SSD',
+      os: 'Windows 11 Pro'
+    }
   },
   {
     id: '2',
@@ -34,7 +61,16 @@ const mockDevices: Device[] = [
     status: 'online',
     isFree: true,
     lastSeen: '2024-01-15 14:25:00',
-    location: 'سالن A'
+    location: 'سالن A',
+    reservationCount: 3,
+    hourlyRate: 12000,
+    systemInfo: {
+      ram: '16GB DDR4',
+      cpu: 'Intel Core i7-12700K',
+      gpu: 'RTX 3070',
+      storage: '512GB NVMe SSD',
+      os: 'Windows 11 Pro'
+    }
   },
   {
     id: '3',
@@ -43,7 +79,16 @@ const mockDevices: Device[] = [
     status: 'online',
     isFree: false,
     lastSeen: '2024-01-15 14:20:00',
-    location: 'سالن B'
+    location: 'سالن B',
+    reservationCount: 8,
+    hourlyRate: 18000,
+    systemInfo: {
+      ram: '64GB DDR5',
+      cpu: 'Intel Core i9-13900K',
+      gpu: 'RTX 4090',
+      storage: '2TB NVMe SSD',
+      os: 'Windows 11 Pro'
+    }
   },
   {
     id: '4',
@@ -52,7 +97,16 @@ const mockDevices: Device[] = [
     status: 'offline',
     isFree: true,
     lastSeen: '2024-01-15 12:00:00',
-    location: 'سالن B'
+    location: 'سالن B',
+    reservationCount: 2,
+    hourlyRate: 10000,
+    systemInfo: {
+      ram: '16GB DDR4',
+      cpu: 'AMD Ryzen 7 5800X',
+      gpu: 'RTX 3060',
+      storage: '256GB NVMe SSD',
+      os: 'Windows 10 Pro'
+    }
   },
   {
     id: '5',
@@ -61,7 +115,16 @@ const mockDevices: Device[] = [
     status: 'online',
     isFree: true,
     lastSeen: '2024-01-15 14:35:00',
-    location: 'سالن C'
+    location: 'سالن C',
+    reservationCount: 4,
+    hourlyRate: 14000,
+    systemInfo: {
+      ram: '32GB DDR4',
+      cpu: 'Intel Core i7-13700K',
+      gpu: 'RTX 4070',
+      storage: '1TB NVMe SSD',
+      os: 'Windows 11 Pro'
+    }
   },
   {
     id: '6',
@@ -70,7 +133,41 @@ const mockDevices: Device[] = [
     status: 'online',
     isFree: false,
     lastSeen: '2024-01-15 14:28:00',
-    location: 'سالن C'
+    location: 'سالن C',
+    reservationCount: 6,
+    hourlyRate: 16000,
+    systemInfo: {
+      ram: '32GB DDR5',
+      cpu: 'AMD Ryzen 9 7900X',
+      gpu: 'RTX 4080',
+      storage: '1TB NVMe SSD',
+      os: 'Windows 11 Pro'
+    }
+  }
+];
+
+// Mock reserved users data
+const mockReservedUsers: ReservedUser[] = [
+  {
+    id: '1',
+    name: 'علی احمدی',
+    email: 'ali.ahmadi@example.com',
+    reservationTime: '2024-01-15 14:00:00',
+    duration: '2 ساعت'
+  },
+  {
+    id: '2',
+    name: 'فاطمه محمدی',
+    email: 'fateme.mohammadi@example.com',
+    reservationTime: '2024-01-15 13:30:00',
+    duration: '3 ساعت'
+  },
+  {
+    id: '3',
+    name: 'محمد رضایی',
+    email: 'mohammad.rezaei@example.com',
+    reservationTime: '2024-01-15 12:45:00',
+    duration: '1.5 ساعت'
   }
 ];
 
@@ -82,6 +179,9 @@ export default function DevicesPage() {
   const [reservationLoading, setReservationLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isReservedUsersModalOpen, setIsReservedUsersModalOpen] = useState(false);
+  const [isSystemDetailsModalOpen, setIsSystemDetailsModalOpen] = useState(false);
+  const [reservedUsers, setReservedUsers] = useState<ReservedUser[]>([]);
 
   // Filter devices to show only free and online devices
   const availableDevices = devices.filter(device => 
@@ -133,6 +233,17 @@ export default function DevicesPage() {
   const handleReservation = (device: Device) => {
     setSelectedDevice(device);
     setIsReservationModalOpen(true);
+  };
+
+  const handleViewReservedUsers = (device: Device) => {
+    setSelectedDevice(device);
+    setReservedUsers(mockReservedUsers); // In real app, fetch from API
+    setIsReservedUsersModalOpen(true);
+  };
+
+  const handleViewSystemDetails = (device: Device) => {
+    setSelectedDevice(device);
+    setIsSystemDetailsModalOpen(true);
   };
 
   const confirmReservation = async () => {
@@ -245,16 +356,6 @@ export default function DevicesPage() {
       )
     },
     {
-      key: 'macAddress',
-      label: 'آدرس MAC',
-      sortable: true,
-      render: (value) => (
-        <code className="bg-gray-700/50 px-2 py-1 rounded text-sm font-mono text-gray-300">
-          {value}
-        </code>
-      )
-    },
-    {
       key: 'status',
       label: 'وضعیت',
       sortable: true,
@@ -267,12 +368,30 @@ export default function DevicesPage() {
       render: (value) => getAvailabilityBadge(value)
     },
     {
-      key: 'lastSeen',
-      label: 'آخرین فعالیت',
+      key: 'reservationCount',
+      label: 'تعداد رزرو',
+      sortable: true,
+      render: (value, device) => (
+        <div className="flex items-center gap-2">
+          <span className="text-white font-medium">{value}</span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => handleViewReservedUsers(device)}
+            className="text-xs px-2 py-1"
+          >
+            مشاهده
+          </Button>
+        </div>
+      )
+    },
+    {
+      key: 'hourlyRate',
+      label: 'نرخ ساعتی',
       sortable: true,
       render: (value) => (
-        <span className="text-sm text-gray-400">
-          {new Date(value).toLocaleString('fa-IR')}
+        <span className="text-green-400 font-medium">
+          {value.toLocaleString('fa-IR')} تومان
         </span>
       )
     }
@@ -280,6 +399,13 @@ export default function DevicesPage() {
 
   // Table actions
   const actions: TableAction<Device>[] = [
+    {
+      label: 'جزئیات سیستم',
+      icon: '💻',
+      onClick: handleViewSystemDetails,
+      variant: 'secondary',
+      className: 'btn-wave'
+    },
     {
       label: 'رزرو',
       icon: '📅',
@@ -424,29 +550,47 @@ export default function DevicesPage() {
                       )}
                     </div>
                     
-                    {/* MAC Address */}
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">آدرس MAC:</p>
-                      <code className="bg-gray-700/50 px-2 py-1 rounded text-xs font-mono text-gray-300 block">
-                        {device.macAddress}
-                      </code>
-                    </div>
-                    
                     {/* Status and Availability */}
                     <div className="flex flex-wrap gap-2">
                       {getStatusBadge(device.status)}
                       {getAvailabilityBadge(device.isFree)}
                     </div>
                     
-                    {/* Last Seen */}
-                    <div>
-                      <p className="text-xs text-gray-400">
-                        آخرین فعالیت: {new Date(device.lastSeen).toLocaleString('fa-IR')}
-                      </p>
+                    {/* Reservation Count and Hourly Rate */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">تعداد رزرو:</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-medium">{device.reservationCount}</span>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleViewReservedUsers(device)}
+                            className="text-xs px-2 py-1"
+                          >
+                            مشاهده
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">نرخ ساعتی:</p>
+                        <span className="text-green-400 font-medium">
+                          {device.hourlyRate.toLocaleString('fa-IR')} تومان
+                        </span>
+                      </div>
                     </div>
                     
-                    {/* Action Button */}
-                    <div className="pt-2">
+                    {/* Action Buttons */}
+                    <div className="pt-2 space-y-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleViewSystemDetails(device)}
+                        className="w-full btn-wave min-h-[44px] touch-manipulation"
+                      >
+                        <span className="ml-1">💻</span>
+                        جزئیات سیستم
+                      </Button>
                       <Button
                         variant="primary"
                         size="sm"
@@ -536,6 +680,132 @@ export default function DevicesPage() {
                   <h4 className="text-yellow-400 font-medium mb-1 text-sm sm:text-base">توجه</h4>
                   <p className="text-yellow-300 text-xs sm:text-sm leading-relaxed">
                     با تأیید این رزرو، دستگاه برای شما رزرو خواهد شد و سایر کاربران قادر به استفاده از آن نخواهند بود.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Reserved Users Modal */}
+      <Modal
+        isOpen={isReservedUsersModalOpen}
+        onClose={() => {
+          setIsReservedUsersModalOpen(false);
+          setSelectedDevice(null);
+        }}
+        title="لیست کاربران رزرو شده"
+        size="lg"
+        primaryAction={{
+          label: 'بستن',
+          onClick: () => {
+            setIsReservedUsersModalOpen(false);
+            setSelectedDevice(null);
+          },
+          variant: 'primary'
+        }}
+      >
+        {selectedDevice && (
+          <div className="space-y-4">
+            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+              <h3 className="text-lg font-semibold text-white mb-2">دستگاه: {selectedDevice.name}</h3>
+              <p className="text-gray-400 text-sm">تعداد کل رزروها: {selectedDevice.reservationCount}</p>
+            </div>
+            
+            <div className="space-y-3">
+              {reservedUsers.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">هیچ کاربر رزرو شده‌ای یافت نشد</p>
+                </div>
+              ) : (
+                reservedUsers.map((user) => (
+                  <div key={user.id} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium">{user.name}</h4>
+                        <p className="text-gray-400 text-sm">{user.email}</p>
+                      </div>
+                      <div className="flex flex-col sm:items-end gap-1">
+                        <span className="text-green-400 text-sm font-medium">{user.duration}</span>
+                        <span className="text-gray-400 text-xs">
+                          {new Date(user.reservationTime).toLocaleString('fa-IR')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* System Details Modal */}
+      <Modal
+        isOpen={isSystemDetailsModalOpen}
+        onClose={() => {
+          setIsSystemDetailsModalOpen(false);
+          setSelectedDevice(null);
+        }}
+        title="جزئیات سیستم"
+        size="md"
+        primaryAction={{
+          label: 'بستن',
+          onClick: () => {
+            setIsSystemDetailsModalOpen(false);
+            setSelectedDevice(null);
+          },
+          variant: 'primary'
+        }}
+      >
+        {selectedDevice && (
+          <div className="space-y-4">
+            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+              <h3 className="text-lg font-semibold text-white mb-3">دستگاه: {selectedDevice.name}</h3>
+              <p className="text-gray-400 text-sm mb-4">{selectedDevice.location}</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">پردازنده:</span>
+                    <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.cpu}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">حافظه RAM:</span>
+                    <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.ram}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">کارت گرافیک:</span>
+                    <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.gpu}</span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">حافظه ذخیره‌سازی:</span>
+                    <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.storage}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">سیستم عامل:</span>
+                    <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.os}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">نرخ ساعتی:</span>
+                    <span className="text-green-400 font-medium text-sm">
+                      {selectedDevice.hourlyRate.toLocaleString('fa-IR')} تومان
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-blue-400 text-lg flex-shrink-0">ℹ️</span>
+                <div className="min-w-0">
+                  <h4 className="text-blue-400 font-medium mb-1">اطلاعات سیستم</h4>
+                  <p className="text-blue-300 text-sm leading-relaxed">
+                    این سیستم برای بازی‌های سنگین و کارهای گرافیکی بهینه‌سازی شده است.
                   </p>
                 </div>
               </div>

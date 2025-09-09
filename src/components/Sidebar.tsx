@@ -144,6 +144,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
         { name: 'کیف پول', href: '/wallet', icon: '💎' },
         { name: 'پرداخت‌ها', href: '/payments', icon: '💳' },
         { name: 'تراکنش‌ها', href: '/transactions', icon: '📈' },
+        { name: 'فاکتورها', href: '/invoices', icon: '📄' },
       ]
     },
     { name: 'تنظیمات', href: '/settings', icon: '⚙️' },
@@ -168,7 +169,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
   };
 
   const isFinancialActive = () => {
-    return pathname.startsWith('/wallet') || pathname.startsWith('/payments') || pathname.startsWith('/transactions');
+    return pathname.startsWith('/wallet') || pathname.startsWith('/payments') || pathname.startsWith('/transactions') || pathname.startsWith('/invoices');
   };
 
   return (

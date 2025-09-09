@@ -11,6 +11,11 @@ interface Gamenet {
   ownerName: string;
   ownerMobile: string;
   address: string;
+  email: string;
+  domain: string;
+  onlineDevices: number;
+  offlineDevices: number;
+  licenseAttachment: File | null;
   createdAt: string;
   status: 'active' | 'inactive';
 }
@@ -31,7 +36,10 @@ export default function GamenetsPage() {
     name: '',
     ownerName: '',
     ownerMobile: '',
-    address: ''
+    address: '',
+    email: '',
+    domain: '',
+    licenseAttachment: null as File | null
   });
 
   useEffect(() => {
@@ -43,6 +51,11 @@ export default function GamenetsPage() {
         ownerName: 'علی احمدی',
         ownerMobile: '09123456789',
         address: 'تهران، خیابان ولیعصر، پلاک 123',
+        email: 'aria.gamenet@gmail.com',
+        domain: 'aria-gamenet',
+        onlineDevices: 15,
+        offlineDevices: 3,
+        licenseAttachment: null,
         createdAt: '2024-01-15',
         status: 'active'
       },
@@ -52,6 +65,11 @@ export default function GamenetsPage() {
         ownerName: 'محمد رضایی',
         ownerMobile: '09187654321',
         address: 'اصفهان، خیابان چهارباغ، پلاک 456',
+        email: 'pars.gamenet@gmail.com',
+        domain: 'pars-gamenet',
+        onlineDevices: 22,
+        offlineDevices: 1,
+        licenseAttachment: null,
         createdAt: '2024-02-20',
         status: 'active'
       },
@@ -61,6 +79,11 @@ export default function GamenetsPage() {
         ownerName: 'حسن محمدی',
         ownerMobile: '09111111111',
         address: 'شیراز، خیابان زند، پلاک 789',
+        email: 'koroush.gamenet@gmail.com',
+        domain: 'koroush-gamenet',
+        onlineDevices: 0,
+        offlineDevices: 12,
+        licenseAttachment: null,
         createdAt: '2024-03-10',
         status: 'inactive'
       },
@@ -70,6 +93,11 @@ export default function GamenetsPage() {
         ownerName: 'فاطمه کریمی',
         ownerMobile: '09222222222',
         address: 'مشهد، خیابان امام رضا، پلاک 321',
+        email: 'atena.gamenet@gmail.com',
+        domain: 'atena-gamenet',
+        onlineDevices: 18,
+        offlineDevices: 2,
+        licenseAttachment: null,
         createdAt: '2024-03-25',
         status: 'active'
       },
@@ -79,6 +107,11 @@ export default function GamenetsPage() {
         ownerName: 'رضا نوری',
         ownerMobile: '09333333333',
         address: 'کرج، خیابان آزادی، پلاک 654',
+        email: 'hakhamanesh.gamenet@gmail.com',
+        domain: 'hakhamanesh-gamenet',
+        onlineDevices: 25,
+        offlineDevices: 0,
+        licenseAttachment: null,
         createdAt: '2024-04-05',
         status: 'active'
       }
@@ -118,6 +151,42 @@ export default function GamenetsPage() {
       render: (value) => <span className="text-gray-300">{value}</span>
     },
     {
+      key: 'email',
+      label: 'ایمیل',
+      sortable: true,
+      render: (value) => <span className="text-gray-300">{value}</span>
+    },
+    {
+      key: 'domain',
+      label: 'دامنه',
+      sortable: true,
+      render: (value) => (
+        <span className="text-blue-400 hover:text-blue-300 cursor-pointer">
+          gatehide.com/{value}
+        </span>
+      )
+    },
+    {
+      key: 'onlineDevices',
+      label: 'دستگاه‌های آنلاین',
+      sortable: true,
+      render: (value) => (
+        <div className="text-green-400 font-semibold text-lg">
+          {value || 0}
+        </div>
+      )
+    },
+    {
+      key: 'offlineDevices',
+      label: 'دستگاه‌های آفلاین',
+      sortable: true,
+      render: (value) => (
+        <div className="text-red-400 font-semibold text-lg">
+          {value || 0}
+        </div>
+      )
+    },
+    {
       key: 'address',
       label: 'آدرس',
       sortable: true,
@@ -148,7 +217,10 @@ export default function GamenetsPage() {
       name: '',
       ownerName: '',
       ownerMobile: '',
-      address: ''
+      address: '',
+      email: '',
+      domain: '',
+      licenseAttachment: null
     });
     setIsModalOpen(true);
   };
@@ -159,7 +231,10 @@ export default function GamenetsPage() {
       name: gamenet.name,
       ownerName: gamenet.ownerName,
       ownerMobile: gamenet.ownerMobile,
-      address: gamenet.address
+      address: gamenet.address,
+      email: gamenet.email,
+      domain: gamenet.domain,
+      licenseAttachment: gamenet.licenseAttachment
     });
     setIsModalOpen(true);
   };
@@ -197,6 +272,8 @@ export default function GamenetsPage() {
       const newGamenet: Gamenet = {
         id: Date.now().toString(),
         ...formData,
+        onlineDevices: 0,
+        offlineDevices: 0,
         createdAt: new Date().toISOString().split('T')[0],
         status: 'active'
       };
@@ -208,14 +285,33 @@ export default function GamenetsPage() {
       name: '',
       ownerName: '',
       ownerMobile: '',
-      address: ''
+      address: '',
+      email: '',
+      domain: '',
+      licenseAttachment: null
     });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    
+    // Validate subdomain format for domain field
+    if (name === 'domain') {
+      // Only allow alphanumeric characters, hyphens, and underscores
+      // Must start and end with alphanumeric character
+      const subdomainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-_]*[a-zA-Z0-9])?$/;
+      if (value === '' || subdomainRegex.test(value)) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: files ? files[0] : value
     }));
   };
 
@@ -224,7 +320,10 @@ export default function GamenetsPage() {
     gamenet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     gamenet.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     gamenet.ownerMobile.includes(searchTerm) ||
-    gamenet.address.toLowerCase().includes(searchTerm.toLowerCase())
+    gamenet.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    gamenet.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    gamenet.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `gatehide.com/${gamenet.domain}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Paginate data
@@ -360,6 +459,17 @@ export default function GamenetsPage() {
             required
             fullWidth
           />
+
+          <Input
+            label="ایمیل"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="ایمیل گیم نت را وارد کنید"
+            required
+            fullWidth
+          />
           
           <Input
             label="آدرس"
@@ -370,6 +480,46 @@ export default function GamenetsPage() {
             required
             fullWidth
           />
+
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              دامنه
+            </label>
+            <div className="relative flex items-center group hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-200">
+              <div className="px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-tr-lg rounded-br-lg text-gray-300 text-sm font-medium border-r-0 group-focus-within:border-purple-500/50 group-focus-within:bg-gray-800/50 group-hover:border-gray-500/50 transition-all duration-200 h-10 flex items-center">
+                gatehide.com.
+              </div>
+              <input
+                type="text"
+                name="domain"
+                value={formData.domain}
+                onChange={handleInputChange}
+                placeholder="نام زیردامنه را وارد کنید"
+                required
+                className="flex-1 px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-tl-lg rounded-bl-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 group-hover:border-gray-500/50 transition-all duration-200 h-10"
+              />
+            </div>
+            <p className="text-xs text-gray-400">
+              فقط نام زیردامنه را وارد کنید (مثال: aria-gamenet). فقط حروف، اعداد، خط تیره و زیرخط مجاز است.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              پیوست مجوز
+            </label>
+            <input
+              type="file"
+              name="licenseAttachment"
+              onChange={handleInputChange}
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+            />
+            <p className="text-xs text-gray-400">
+              فرمت‌های مجاز: PDF, JPG, JPEG, PNG, DOC, DOCX
+            </p>
+          </div>
           
           <div className="flex items-center justify-end gap-2 pt-4">
             <Button

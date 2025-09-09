@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
+import Swal from 'sweetalert2';
 
 interface User {
   id: string;
@@ -13,6 +14,17 @@ interface User {
   createdAt: string;
   status: 'active' | 'inactive';
   balance: number;
+  debt: number;
+}
+
+interface DebtTransaction {
+  id: string;
+  userId: string;
+  amount: number;
+  submitter: string;
+  date: string;
+  time: string;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 export default function UsersPage() {
@@ -20,13 +32,17 @@ export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+  const [isDebtHistoryModalOpen, setIsDebtHistoryModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userToUpdateBalance, setUserToUpdateBalance] = useState<User | null>(null);
+  const [userForDebtHistory, setUserForDebtHistory] = useState<User | null>(null);
+  const [debtHistory, setDebtHistory] = useState<DebtTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [balanceAmount, setBalanceAmount] = useState('');
+  const [transactionType, setTransactionType] = useState<'balance' | 'debt'>('balance');
   const itemsPerPage = 10;
 
   // Form state
@@ -46,7 +62,8 @@ export default function UsersPage() {
         mobile: '09123456789',
         createdAt: '2024-01-15',
         status: 'active',
-        balance: 1500000
+        balance: 1500000,
+        debt: 0
       },
       {
         id: '2',
@@ -55,7 +72,8 @@ export default function UsersPage() {
         mobile: '09187654321',
         createdAt: '2024-02-20',
         status: 'active',
-        balance: 750000
+        balance: 750000,
+        debt: 50000
       },
       {
         id: '3',
@@ -64,7 +82,8 @@ export default function UsersPage() {
         mobile: '09111111111',
         createdAt: '2024-03-10',
         status: 'inactive',
-        balance: 0
+        balance: 0,
+        debt: 200000
       },
       {
         id: '4',
@@ -73,7 +92,8 @@ export default function UsersPage() {
         mobile: '09222222222',
         createdAt: '2024-03-25',
         status: 'active',
-        balance: 2300000
+        balance: 2300000,
+        debt: 0
       },
       {
         id: '5',
@@ -82,7 +102,8 @@ export default function UsersPage() {
         mobile: '09333333333',
         createdAt: '2024-04-05',
         status: 'active',
-        balance: 500000
+        balance: 500000,
+        debt: 100000
       },
       {
         id: '6',
@@ -91,7 +112,8 @@ export default function UsersPage() {
         mobile: '09444444444',
         createdAt: '2024-04-12',
         status: 'active',
-        balance: 1800000
+        balance: 1800000,
+        debt: 0
       },
       {
         id: '7',
@@ -100,7 +122,8 @@ export default function UsersPage() {
         mobile: '09555555555',
         createdAt: '2024-04-18',
         status: 'inactive',
-        balance: 0
+        balance: 0,
+        debt: 300000
       },
       {
         id: '8',
@@ -109,7 +132,147 @@ export default function UsersPage() {
         mobile: '09666666666',
         createdAt: '2024-04-22',
         status: 'active',
-        balance: 950000
+        balance: 950000,
+        debt: 75000
+      }
+    ];
+
+    // Mock debt history data
+    const mockDebtHistory: DebtTransaction[] = [
+      {
+        id: '1',
+        userId: '2',
+        amount: 50000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-20',
+        time: '14:30',
+        status: 'approved'
+      },
+      {
+        id: '2',
+        userId: '3',
+        amount: 200000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-18',
+        time: '16:45',
+        status: 'approved'
+      },
+      {
+        id: '3',
+        userId: '5',
+        amount: 100000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-15',
+        time: '10:20',
+        status: 'approved'
+      },
+      {
+        id: '4',
+        userId: '7',
+        amount: 300000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-12',
+        time: '19:15',
+        status: 'approved'
+      },
+      {
+        id: '5',
+        userId: '8',
+        amount: 75000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-10',
+        time: '13:00',
+        status: 'approved'
+      },
+      {
+        id: '6',
+        userId: '2',
+        amount: 25000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-08',
+        time: '11:30',
+        status: 'pending'
+      },
+      {
+        id: '7',
+        userId: '5',
+        amount: 50000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-05',
+        time: '15:45',
+        status: 'rejected'
+      },
+      {
+        id: '8',
+        userId: '1',
+        amount: 120000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-22',
+        time: '09:15',
+        status: 'approved'
+      },
+      {
+        id: '9',
+        userId: '4',
+        amount: 85000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-21',
+        time: '17:30',
+        status: 'approved'
+      },
+      {
+        id: '10',
+        userId: '6',
+        amount: 150000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-19',
+        time: '12:45',
+        status: 'pending'
+      },
+      {
+        id: '11',
+        userId: '2',
+        amount: 30000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-17',
+        time: '14:20',
+        status: 'approved'
+      },
+      {
+        id: '12',
+        userId: '8',
+        amount: 95000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-16',
+        time: '11:10',
+        status: 'approved'
+      },
+      {
+        id: '13',
+        userId: '3',
+        amount: 180000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-14',
+        time: '16:00',
+        status: 'approved'
+      },
+      {
+        id: '14',
+        userId: '5',
+        amount: 65000,
+        submitter: 'مدیر گیم نت',
+        date: '2024-04-13',
+        time: '13:25',
+        status: 'pending'
+      },
+      {
+        id: '15',
+        userId: '7',
+        amount: 220000,
+        submitter: 'مدیر سیستم',
+        date: '2024-04-11',
+        time: '10:40',
+        status: 'approved'
       }
     ];
 
@@ -117,6 +280,7 @@ export default function UsersPage() {
     setIsLoading(true);
     setTimeout(() => {
       setUsers(mockUsers);
+      setDebtHistory(mockDebtHistory);
       setIsLoading(false);
     }, 1000);
   }, []);
@@ -151,7 +315,7 @@ export default function UsersPage() {
       label: 'موجودی',
       sortable: true,
       render: (value, item) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2 min-w-[200px]">
           <span className="text-green-400 font-semibold">
             {value.toLocaleString('fa-IR')} تومان
           </span>
@@ -162,9 +326,32 @@ export default function UsersPage() {
               e.stopPropagation();
               handleIncreaseBalance(item);
             }}
-            className="btn-wave"
+            className="btn-wave flex-shrink-0"
           >
             ➕
+          </Button>
+        </div>
+      )
+    },
+    {
+      key: 'debt',
+      label: 'بدهی',
+      sortable: true,
+      render: (value, item) => (
+        <div className="flex items-center justify-center gap-2 min-w-[200px]">
+          <span className={`font-semibold ${value > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+            {value.toLocaleString('fa-IR')} تومان
+          </span>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDebtHistory(item);
+            }}
+            className="btn-wave flex-shrink-0"
+          >
+            📋
           </Button>
         </div>
       )
@@ -215,7 +402,13 @@ export default function UsersPage() {
   const handleIncreaseBalance = (user: User) => {
     setUserToUpdateBalance(user);
     setBalanceAmount('');
+    setTransactionType('balance');
     setIsBalanceModalOpen(true);
+  };
+
+  const handleViewDebtHistory = (user: User) => {
+    setUserForDebtHistory(user);
+    setIsDebtHistoryModalOpen(true);
   };
 
   const confirmDelete = () => {
@@ -235,23 +428,50 @@ export default function UsersPage() {
     e.preventDefault();
     
     if (!balanceAmount || parseFloat(balanceAmount) <= 0) {
-      alert('لطفاً مبلغ معتبری وارد کنید');
+      Swal.fire({
+        title: 'خطا',
+        text: 'لطفاً مبلغ معتبری وارد کنید',
+        icon: 'error',
+        confirmButtonText: 'باشه',
+        confirmButtonColor: '#ef4444'
+      });
       return;
     }
 
     if (userToUpdateBalance) {
       const amount = parseFloat(balanceAmount);
+      const actionText = transactionType === 'balance' ? 'افزایش یافت' : 'اضافه شد';
+      const fieldText = transactionType === 'balance' ? 'موجودی' : 'بدهی';
+      const userName = userToUpdateBalance.name;
+      
+      // Update the user data
       setUsers(prev => prev.map(u => 
         u.id === userToUpdateBalance.id 
-          ? { ...u, balance: u.balance + amount }
+          ? { 
+              ...u, 
+              balance: transactionType === 'balance' ? u.balance + amount : u.balance,
+              debt: transactionType === 'debt' ? u.debt + amount : u.debt
+            }
           : u
       ));
       
+      // Close modal first
       setBalanceAmount('');
       setUserToUpdateBalance(null);
       setIsBalanceModalOpen(false);
       
-      alert(`موجودی کاربر ${userToUpdateBalance.name} با موفقیت افزایش یافت!`);
+      // Show success toast after modal closes
+      setTimeout(() => {
+        Swal.fire({
+          title: 'موفقیت',
+          text: `${fieldText} کاربر ${userName} با موفقیت ${actionText}!`,
+          icon: 'success',
+          confirmButtonText: 'باشه',
+          confirmButtonColor: '#10b981',
+          timer: 3000,
+          timerProgressBar: true
+        });
+      }, 100);
     }
   };
 
@@ -292,7 +512,8 @@ export default function UsersPage() {
         ...formData,
         createdAt: new Date().toISOString().split('T')[0],
         status: 'active',
-        balance: 0
+        balance: 0,
+        debt: 0
       };
       setUsers(prev => [newUser, ...prev]);
     }
@@ -317,7 +538,8 @@ export default function UsersPage() {
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.mobile.includes(searchTerm) ||
-    user.balance.toString().includes(searchTerm)
+    user.balance.toString().includes(searchTerm) ||
+    user.debt.toString().includes(searchTerm)
   );
 
   // Paginate data
@@ -380,6 +602,9 @@ export default function UsersPage() {
         </Badge>
         <Badge variant="secondary" size="md">
           💰 {users.reduce((sum, u) => sum + u.balance, 0).toLocaleString('fa-IR')} تومان کل موجودی
+        </Badge>
+        <Badge variant="danger" size="md">
+          💸 {users.reduce((sum, u) => sum + u.debt, 0).toLocaleString('fa-IR')} تومان کل بدهی
         </Badge>
       </div>
 
@@ -515,7 +740,7 @@ export default function UsersPage() {
       <Modal
         isOpen={isBalanceModalOpen}
         onClose={() => setIsBalanceModalOpen(false)}
-        title="افزایش موجودی کاربر"
+        title={transactionType === 'balance' ? 'افزایش موجودی کاربر' : 'افزودن بدهی کاربر'}
         size="md"
       >
         <form onSubmit={handleBalanceSubmit} className="space-y-4">
@@ -525,11 +750,41 @@ export default function UsersPage() {
               <p className="text-gray-300">نام: {userToUpdateBalance.name}</p>
               <p className="text-gray-300">ایمیل: {userToUpdateBalance.email}</p>
               <p className="text-gray-300">موجودی فعلی: {userToUpdateBalance.balance.toLocaleString('fa-IR')} تومان</p>
+              <p className="text-gray-300">بدهی فعلی: {userToUpdateBalance.debt.toLocaleString('fa-IR')} تومان</p>
             </div>
           )}
           
+          {/* Transaction Type Selection */}
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-white">نوع تراکنش</label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setTransactionType('balance')}
+                className={`flex-1 px-4 py-2 rounded-lg border transition-all ${
+                  transactionType === 'balance'
+                    ? 'bg-green-600 border-green-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                💰 افزایش موجودی
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransactionType('debt')}
+                className={`flex-1 px-4 py-2 rounded-lg border transition-all ${
+                  transactionType === 'debt'
+                    ? 'bg-red-600 border-red-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                💸 افزودن بدهی
+              </button>
+            </div>
+          </div>
+          
           <Input
-            label="مبلغ افزایش (تومان)"
+            label={transactionType === 'balance' ? 'مبلغ افزایش (تومان)' : 'مبلغ بدهی (تومان)'}
             name="balanceAmount"
             type="number"
             value={balanceAmount}
@@ -543,6 +798,7 @@ export default function UsersPage() {
             {[50000, 100000, 200000, 500000, 1000000, 2000000].map((amount) => (
               <Button
                 key={amount}
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setBalanceAmount(amount.toString())}
@@ -565,10 +821,98 @@ export default function UsersPage() {
               type="submit"
               variant="primary"
             >
-              افزایش موجودی
+              {transactionType === 'balance' ? 'افزایش موجودی' : 'افزودن بدهی'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Debt History Modal */}
+      <Modal
+        isOpen={isDebtHistoryModalOpen}
+        onClose={() => setIsDebtHistoryModalOpen(false)}
+        title="تاریخچه بدهی کاربر"
+        size="lg"
+      >
+        {userForDebtHistory && (
+          <div className="space-y-4">
+            {/* User Info */}
+            <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+              <h3 className="text-lg font-semibold text-white mb-2">اطلاعات کاربر</h3>
+              <p className="text-gray-300">نام: {userForDebtHistory.name}</p>
+              <p className="text-gray-300">ایمیل: {userForDebtHistory.email}</p>
+              <p className="text-gray-300">بدهی فعلی: {userForDebtHistory.debt.toLocaleString('fa-IR')} تومان</p>
+            </div>
+
+            {/* Debt History Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-right">
+                <thead className="text-xs text-gray-400 uppercase bg-gray-700/50">
+                  <tr>
+                    <th className="px-3 py-3">#ID</th>
+                    <th className="px-3 py-3">مبلغ</th>
+                    <th className="px-3 py-3">ثبت کننده</th>
+                    <th className="px-3 py-3">تاریخ</th>
+                    <th className="px-3 py-3">زمان</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {debtHistory
+                    .filter(transaction => transaction.userId === userForDebtHistory.id)
+                    .map((transaction) => (
+                      <tr key={transaction.id} className="border-b border-gray-700/50 hover:bg-gray-800/30">
+                        <td className="px-3 py-3 text-gray-300">#{transaction.id}</td>
+                        <td className="px-3 py-3 text-red-400 font-semibold">
+                          {transaction.amount.toLocaleString('fa-IR')} تومان
+                        </td>
+                        <td className="px-3 py-3 text-gray-300">{transaction.submitter}</td>
+                        <td className="px-3 py-3 text-gray-300">{transaction.date}</td>
+                        <td className="px-3 py-3 text-gray-300">{transaction.time}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              
+              {/* Empty State */}
+              {debtHistory.filter(transaction => 
+                transaction.userId === userForDebtHistory.id
+              ).length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 text-lg mb-2">📋</div>
+                  <p className="text-gray-400">هیچ بدهی ثبت شده‌ای برای این کاربر وجود ندارد</p>
+                </div>
+              )}
+            </div>
+
+            {/* Summary */}
+            {debtHistory.filter(transaction => 
+              transaction.userId === userForDebtHistory.id
+            ).length > 0 && (
+              <div className="bg-gray-800/30 rounded-lg p-4 mt-4">
+                <h4 className="text-white font-semibold mb-2">خلاصه بدهی‌ها</h4>
+                <div className="text-sm">
+                  <span className="text-gray-400">کل بدهی‌ها:</span>
+                  <span className="text-red-400 font-semibold mr-2">
+                    {debtHistory
+                      .filter(t => t.userId === userForDebtHistory.id)
+                      .reduce((sum, t) => sum + t.amount, 0)
+                      .toLocaleString('fa-IR')} تومان
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Close Button */}
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={() => setIsDebtHistoryModalOpen(false)}
+                variant="outline"
+              >
+                بستن
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
 
     </ContentArea>
