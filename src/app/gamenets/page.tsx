@@ -1,27 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { apiClient, ApiResponse } from '../../utils/api';
+import { useAuth } from '../../hooks/useAuth';
+import { toJalaliDisplay } from '../../utils/jalali';
 
 interface Gamenet extends Record<string, unknown> {
   id: string;
   name: string;
-  ownerName: string;
-  ownerMobile: string;
+  owner_name: string;
+  owner_mobile: string;
   address: string;
   email: string;
-  domain: string;
-  onlineDevices: number;
-  offlineDevices: number;
-  licenseAttachment: File | null;
-  createdAt: string;
-  status: 'active' | 'inactive';
+  password?: string; // Optional, not displayed in UI
+  license_attachment: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface GamenetFormData {
+  name: string;
+  owner_name: string;
+  owner_mobile: string;
+  address: string;
+  email: string;
+  license_attachment: File | null;
 }
 
 function GamenetsPageContent() {
+  const { token } = useAuth();
   const [gamenets, setGamenets] = useState<Gamenet[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -30,101 +41,207 @@ function GamenetsPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const itemsPerPage = 10;
+  
+  // Search and pagination state
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+  
+  // Track last token that was used for fetching
+  const lastFetchedTokenRef = useRef<string | null>(null);
+
+  // Validation functions
+  const validateForm = (data: GamenetFormData): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (!data.name.trim()) {
+      errors.name = 'نام گیم نت الزامی است';
+    } else if (data.name.trim().length < 2) {
+      errors.name = 'نام گیم نت باید حداقل 2 کاراکتر باشد';
+    }
+
+    if (!data.owner_name.trim()) {
+      errors.owner_name = 'نام مالک الزامی است';
+    } else if (data.owner_name.trim().length < 2) {
+      errors.owner_name = 'نام مالک باید حداقل 2 کاراکتر باشد';
+    }
+
+    if (!data.owner_mobile.trim()) {
+      errors.owner_mobile = 'شماره موبایل الزامی است';
+    } else if (!/^09\d{9}$/.test(data.owner_mobile.trim())) {
+      errors.owner_mobile = 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد';
+    }
+
+    if (!data.email.trim()) {
+      errors.email = 'ایمیل الزامی است';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+      errors.email = 'فرمت ایمیل صحیح نیست';
+    }
+
+    if (!data.address.trim()) {
+      errors.address = 'آدرس الزامی است';
+    } else if (data.address.trim().length < 10) {
+      errors.address = 'آدرس باید حداقل 10 کاراکتر باشد';
+    }
+
+    return errors;
+  };
+
+  const clearValidationErrors = () => {
+    setValidationErrors({});
+  };
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<GamenetFormData>({
     name: '',
-    ownerName: '',
-    ownerMobile: '',
+    owner_name: '',
+    owner_mobile: '',
     address: '',
     email: '',
-    domain: '',
-    licenseAttachment: null as File | null
+    license_attachment: null
   });
 
-  useEffect(() => {
-    // Mock data - replace with actual API calls
-    const mockGamenets: Gamenet[] = [
-      {
-        id: '1',
-        name: 'گیم نت آریا',
-        ownerName: 'علی احمدی',
-        ownerMobile: '09123456789',
-        address: 'تهران، خیابان ولیعصر، پلاک 123',
-        email: 'aria.gamenet@gmail.com',
-        domain: 'aria-gamenet',
-        onlineDevices: 15,
-        offlineDevices: 3,
-        licenseAttachment: null,
-        createdAt: '2024-01-15',
-        status: 'active'
-      },
-      {
-        id: '2',
-        name: 'گیم نت پارس',
-        ownerName: 'محمد رضایی',
-        ownerMobile: '09187654321',
-        address: 'اصفهان، خیابان چهارباغ، پلاک 456',
-        email: 'pars.gamenet@gmail.com',
-        domain: 'pars-gamenet',
-        onlineDevices: 22,
-        offlineDevices: 1,
-        licenseAttachment: null,
-        createdAt: '2024-02-20',
-        status: 'active'
-      },
-      {
-        id: '3',
-        name: 'گیم نت کوروش',
-        ownerName: 'حسن محمدی',
-        ownerMobile: '09111111111',
-        address: 'شیراز، خیابان زند، پلاک 789',
-        email: 'koroush.gamenet@gmail.com',
-        domain: 'koroush-gamenet',
-        onlineDevices: 0,
-        offlineDevices: 12,
-        licenseAttachment: null,
-        createdAt: '2024-03-10',
-        status: 'inactive'
-      },
-      {
-        id: '4',
-        name: 'گیم نت آتنا',
-        ownerName: 'فاطمه کریمی',
-        ownerMobile: '09222222222',
-        address: 'مشهد، خیابان امام رضا، پلاک 321',
-        email: 'atena.gamenet@gmail.com',
-        domain: 'atena-gamenet',
-        onlineDevices: 18,
-        offlineDevices: 2,
-        licenseAttachment: null,
-        createdAt: '2024-03-25',
-        status: 'active'
-      },
-      {
-        id: '5',
-        name: 'گیم نت هخامنش',
-        ownerName: 'رضا نوری',
-        ownerMobile: '09333333333',
-        address: 'کرج، خیابان آزادی، پلاک 654',
-        email: 'hakhamanesh.gamenet@gmail.com',
-        domain: 'hakhamanesh-gamenet',
-        onlineDevices: 25,
-        offlineDevices: 0,
-        licenseAttachment: null,
-        createdAt: '2024-04-05',
-        status: 'active'
+  // API functions
+  const fetchGamenets = useCallback(async (searchQuery: string = '', page: number = 1, pageSize: number = 10) => {
+    if (!token) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('query', searchQuery);
+      if (page > 1) params.append('page', page.toString());
+      if (pageSize !== 10) params.append('page_size', pageSize.toString());
+      
+      const url = `/gamenets/${params.toString() ? '?' + params.toString() : ''}`;
+      
+      const response = await apiClient.authenticatedRequest<ApiResponse<Gamenet[]>>(
+        url,
+        token,
+        { method: 'GET' }
+      );
+      
+      // Check if response has pagination data
+      if (response.pagination) {
+        setGamenets(response.data || []);
+        setTotalItems(response.pagination.total_items);
+        setTotalPages(response.pagination.total_pages);
+        setHasNext(response.pagination.has_next);
+        setHasPrev(response.pagination.has_prev);
+      } else {
+        // Fallback for non-paginated response
+        setGamenets(response.data || []);
+        setTotalItems(response.data ? response.data.length : 0);
+        setTotalPages(1);
+        setHasNext(false);
+        setHasPrev(false);
       }
-    ];
-
-    // Simulate API call
-    setIsLoading(true);
-    setTimeout(() => {
-      setGamenets(mockGamenets);
+    } catch (err) {
+      console.error('Error fetching gamenets:', err);
+      setError('خطا در بارگذاری گیم نت‌ها');
+    } finally {
       setIsLoading(false);
-    }, 1000);
-  }, []);
+    }
+  }, [token]);
+
+  // Function to refresh data (for after create/update/delete)
+  const refreshGamenets = useCallback(async () => {
+    await fetchGamenets(searchTerm, currentPage, itemsPerPage);
+  }, [fetchGamenets, searchTerm, currentPage, itemsPerPage]);
+
+  const createGamenet = async (gamenetData: GamenetFormData) => {
+    if (!token) throw new Error('No authentication token');
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('name', gamenetData.name);
+    formData.append('owner_name', gamenetData.owner_name);
+    formData.append('owner_mobile', gamenetData.owner_mobile);
+    formData.append('address', gamenetData.address);
+    formData.append('email', gamenetData.email);
+    
+    if (gamenetData.license_attachment) {
+      formData.append('license_attachment', gamenetData.license_attachment);
+    }
+    
+    const response = await apiClient.authenticatedRequestWithProgress<ApiResponse<Gamenet>>(
+      '/gamenets/',
+      token,
+      {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type header, let browser set it with boundary
+      },
+      (progress) => {
+        setUploadProgress(progress);
+        setIsUploading(progress < 100);
+      }
+    );
+    return response.data;
+  };
+
+  const updateGamenet = async (id: string, gamenetData: GamenetFormData) => {
+    if (!token) throw new Error('No authentication token');
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    
+    // Always send all fields for update
+    formData.append('name', gamenetData.name);
+    formData.append('owner_name', gamenetData.owner_name);
+    formData.append('owner_mobile', gamenetData.owner_mobile);
+    formData.append('address', gamenetData.address);
+    formData.append('email', gamenetData.email);
+    
+    if (gamenetData.license_attachment) {
+      formData.append('license_attachment', gamenetData.license_attachment);
+    }
+    
+    const response = await apiClient.authenticatedRequestWithProgress<ApiResponse<Gamenet>>(
+      `/gamenets/${id}`,
+      token,
+      {
+        method: 'PUT',
+        body: formData,
+        // Don't set Content-Type header, let browser set it with boundary
+      },
+      (progress) => {
+        setUploadProgress(progress);
+        setIsUploading(progress < 100);
+      }
+    );
+    return response.data;
+  };
+
+  const deleteGamenet = async (id: string) => {
+    if (!token) throw new Error('No authentication token');
+    
+    await apiClient.authenticatedRequest<ApiResponse<Record<string, never>>>(
+      `/gamenets/${id}`,
+      token,
+      { method: 'DELETE' }
+    );
+  };
+
+
+  // Fetch gamenets on mount and when token changes
+  useEffect(() => {
+    if (!token) return;
+    
+    // Only fetch if we haven't already loaded for this specific token
+    if (lastFetchedTokenRef.current !== token) {
+      lastFetchedTokenRef.current = token;
+      fetchGamenets(searchTerm, currentPage, itemsPerPage);
+    }
+  }, [token, fetchGamenets, searchTerm, currentPage, itemsPerPage]); // Depend on all relevant variables
 
   // Table columns configuration
   const columns: TableColumn<Gamenet>[] = [
@@ -140,13 +257,13 @@ function GamenetsPageContent() {
       )
     },
     {
-      key: 'ownerName',
+      key: 'owner_name',
       label: 'مالک',
       sortable: true,
       render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
-      key: 'ownerMobile',
+      key: 'owner_mobile',
       label: 'موبایل',
       sortable: true,
       render: (value) => <span className="text-gray-300">{String(value)}</span>
@@ -158,56 +275,66 @@ function GamenetsPageContent() {
       render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
-      key: 'domain',
-      label: 'دامنه',
-      sortable: true,
-      render: (value) => (
-        <span className="text-blue-400 hover:text-blue-300 cursor-pointer">
-          gatehide.com/{String(value)}
-        </span>
-      )
-    },
-    {
-      key: 'onlineDevices',
-      label: 'دستگاه‌های آنلاین',
-      sortable: true,
-      render: (value) => (
-        <div className="text-green-400 font-semibold text-lg">
-          {String(value) || 0}
-        </div>
-      )
-    },
-    {
-      key: 'offlineDevices',
-      label: 'دستگاه‌های آفلاین',
-      sortable: true,
-      render: (value) => (
-        <div className="text-red-400 font-semibold text-lg">
-          {String(value) || 0}
-        </div>
-      )
-    },
-    {
       key: 'address',
       label: 'آدرس',
       sortable: true,
       render: (value) => <span className="text-gray-300 truncate max-w-xs">{String(value)}</span>
     },
     {
-      key: 'status',
-      label: 'وضعیت',
-      sortable: true,
-      render: (value) => (
-        <Badge variant={value === 'active' ? 'success' : 'secondary'}>
-          {value === 'active' ? 'فعال' : 'غیرفعال'}
-        </Badge>
-      )
+      key: 'license_attachment',
+      label: 'مجوز',
+      sortable: false,
+      render: (value, gamenet) => {
+        if (!value || !String(value).trim()) {
+          return (
+            <span className="text-gray-500 text-sm">
+              <span className="text-gray-600">📄</span> ندارد
+            </span>
+          );
+        }
+        
+        const licenseUrl = String(value);
+        const fileName = licenseUrl.split('/').pop() || 'license';
+        const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+        
+        // Determine file type icon
+        let fileIcon = '📄';
+        if (['pdf'].includes(fileExtension)) {
+          fileIcon = '📕';
+        } else if (['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+          fileIcon = '🖼️';
+        } else if (['doc', 'docx'].includes(fileExtension)) {
+          fileIcon = '📝';
+        }
+        
+        return (
+          <button
+            onClick={() => window.open(licenseUrl, '_blank')}
+            className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 hover:bg-blue-900/20 px-2 py-1 rounded-md group"
+            title={`مشاهده مجوز: ${fileName}`}
+          >
+            <span className="text-lg group-hover:scale-110 transition-transform duration-200">
+              {fileIcon}
+            </span>
+            <span className="text-xs truncate max-w-20" title={fileName}>
+              {fileName.length > 15 ? `${fileName.substring(0, 15)}...` : fileName}
+            </span>
+            <span className="text-blue-500 group-hover:text-blue-400 transition-colors duration-200">
+              🔗
+            </span>
+          </button>
+        );
+      }
     },
     {
-      key: 'createdAt',
+      key: 'created_at',
       label: 'تاریخ ایجاد',
       sortable: true,
-      render: (value) => <span className="text-gray-400">{String(value)}</span>
+      render: (value) => (
+        <span className="text-gray-400" title={`تاریخ میلادی: ${String(value)}`}>
+          {toJalaliDisplay(String(value))}
+        </span>
+      )
     }
   ];
 
@@ -216,13 +343,15 @@ function GamenetsPageContent() {
     setEditingGamenet(null);
     setFormData({
       name: '',
-      ownerName: '',
-      ownerMobile: '',
+      owner_name: '',
+      owner_mobile: '',
       address: '',
       email: '',
-      domain: '',
-      licenseAttachment: null
+      license_attachment: null
     });
+    clearValidationErrors();
+    setIsUploading(false);
+    setUploadProgress(0);
     setIsModalOpen(true);
   };
 
@@ -230,13 +359,15 @@ function GamenetsPageContent() {
     setEditingGamenet(gamenet);
     setFormData({
       name: gamenet.name,
-      ownerName: gamenet.ownerName,
-      ownerMobile: gamenet.ownerMobile,
+      owner_name: gamenet.owner_name,
+      owner_mobile: gamenet.owner_mobile,
       address: gamenet.address,
       email: gamenet.email,
-      domain: gamenet.domain,
-      licenseAttachment: gamenet.licenseAttachment
+      license_attachment: null // Reset file input for editing
     });
+    clearValidationErrors();
+    setIsUploading(false);
+    setUploadProgress(0);
     setIsModalOpen(true);
   };
 
@@ -245,11 +376,21 @@ function GamenetsPageContent() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (gamenetToDelete) {
-      setGamenets(prev => prev.filter(g => g.id !== gamenetToDelete.id));
-      setGamenetToDelete(null);
-      setIsDeleteModalOpen(false);
+      try {
+        setIsLoading(true);
+        setError(null);
+        await deleteGamenet(gamenetToDelete.id);
+        await refreshGamenets(); // Refresh the list
+        setGamenetToDelete(null);
+        setIsDeleteModalOpen(false);
+      } catch (err) {
+        console.error('Error deleting gamenet:', err);
+        setError('خطا در حذف گیم نت');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -258,88 +399,79 @@ function GamenetsPageContent() {
     setIsDeleteModalOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingGamenet) {
-      // Update existing gamenet
-      setGamenets(prev => prev.map(g => 
-        g.id === editingGamenet.id 
-          ? { ...g, ...formData }
-          : g
-      ));
-    } else {
-      // Add new gamenet
-      const newGamenet: Gamenet = {
-        id: Date.now().toString(),
-        ...formData,
-        onlineDevices: 0,
-        offlineDevices: 0,
-        createdAt: new Date().toISOString().split('T')[0],
-        status: 'active'
-      };
-      setGamenets(prev => [newGamenet, ...prev]);
+    // Validate form
+    const errors = validateForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
     }
+
+    // Clear validation errors
+    clearValidationErrors();
     
-    setIsModalOpen(false);
-    setFormData({
-      name: '',
-      ownerName: '',
-      ownerMobile: '',
-      address: '',
-      email: '',
-      domain: '',
-      licenseAttachment: null
-    });
+    try {
+      setIsLoading(true);
+      setError(null);
+    
+      if (editingGamenet) {
+        // Update existing gamenet
+        await updateGamenet(editingGamenet.id, formData);
+      } else {
+        // Add new gamenet
+        await createGamenet(formData);
+      }
+      
+      await fetchGamenets(); // Refresh the list
+      setIsModalOpen(false);
+      setFormData({
+        name: '',
+        owner_name: '',
+        owner_mobile: '',
+        address: '',
+        email: '',
+        license_attachment: null
+      });
+    } catch (err) {
+      console.error('Error saving gamenet:', err);
+      setError(editingGamenet ? 'خطا در ویرایش گیم نت' : 'خطا در افزودن گیم نت');
+    } finally {
+      setIsLoading(false);
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
     
-    // Validate subdomain format for domain field
-    if (name === 'domain') {
-      // Only allow alphanumeric characters, hyphens, and underscores
-      // Must start and end with alphanumeric character
-      const subdomainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-_]*[a-zA-Z0-9])?$/;
-      if (value === '' || subdomainRegex.test(value)) {
-        setFormData(prev => ({
-          ...prev,
-          [name]: value
-        }));
-      }
-      return;
-    }
-    
     setFormData(prev => ({
       ...prev,
       [name]: files ? files[0] : value
     }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
-
-  // Filter gamenets based on search term
-  const filteredGamenets = gamenets.filter(gamenet =>
-    gamenet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gamenet.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gamenet.ownerMobile.includes(searchTerm) ||
-    gamenet.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gamenet.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gamenet.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    `gatehide.com/${gamenet.domain}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Paginate data
-  const totalPages = Math.ceil(filteredGamenets.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedGamenets = filteredGamenets.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    fetchGamenets(searchTerm, page, itemsPerPage);
   };
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+    fetchGamenets(value, 1, itemsPerPage);
   };
 
   // Table actions configuration
@@ -378,13 +510,20 @@ function GamenetsPageContent() {
         </Button>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="flex flex-row items-center justify-center sm:justify-start gap-2 sm:gap-4 w-full sm:w-auto">
         <Badge variant="primary" size="md">
-          📊 {gamenets.length} گیم نت
-        </Badge>
-        <Badge variant="success" size="md">
-          🟢 {gamenets.filter(g => g.status === 'active').length} فعال
+          📊 {gamenets?.length || 0} گیم نت
         </Badge>
       </div>
 
@@ -404,7 +543,7 @@ function GamenetsPageContent() {
 
       {/* Gamenets Table */}
       <Table
-        data={paginatedGamenets}
+        data={gamenets}
         columns={columns}
         actions={actions}
         searchable={false}
@@ -417,7 +556,7 @@ function GamenetsPageContent() {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        totalItems={filteredGamenets.length}
+        totalItems={totalItems}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
       />
@@ -431,80 +570,83 @@ function GamenetsPageContent() {
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="نام گیم نت"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="نام گیم نت را وارد کنید"
-            required
-            fullWidth
-          />
-          
-          <Input
-            label="نام مالک"
-            name="ownerName"
-            value={formData.ownerName}
-            onChange={handleInputChange}
-            placeholder="نام مالک را وارد کنید"
-            required
-            fullWidth
-          />
-          
-          <Input
-            label="شماره موبایل مالک"
-            name="ownerMobile"
-            value={formData.ownerMobile}
-            onChange={handleInputChange}
-            placeholder="شماره موبایل را وارد کنید"
-            required
-            fullWidth
-          />
-
-          <Input
-            label="ایمیل"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="ایمیل گیم نت را وارد کنید"
-            required
-            fullWidth
-          />
-          
-          <Input
-            label="آدرس"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            placeholder="آدرس گیم نت را وارد کنید"
-            required
-            fullWidth
-          />
-
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              دامنه
-            </label>
-            <div className="relative flex items-center group hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-200">
-              <div className="px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-tr-lg rounded-br-lg text-gray-300 text-sm font-medium border-r-0 group-focus-within:border-purple-500/50 group-focus-within:bg-gray-800/50 group-hover:border-gray-500/50 transition-all duration-200 h-10 flex items-center">
-                gatehide.com.
-              </div>
-              <input
-                type="text"
-                name="domain"
-                value={formData.domain}
-                onChange={handleInputChange}
-                placeholder="نام زیردامنه را وارد کنید"
-                required
-                className="flex-1 px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-tl-lg rounded-bl-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 group-hover:border-gray-500/50 transition-all duration-200 h-10"
-              />
-            </div>
-            <p className="text-xs text-gray-400">
-              فقط نام زیردامنه را وارد کنید (مثال: aria-gamenet). فقط حروف، اعداد، خط تیره و زیرخط مجاز است.
-            </p>
+          <div>
+            <Input
+              label="نام گیم نت"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="نام گیم نت را وارد کنید"
+              required
+              fullWidth
+            />
+            {validationErrors.name && (
+              <p className="text-red-400 text-sm mt-1">{validationErrors.name}</p>
+            )}
           </div>
+          
+          <div>
+            <Input
+              label="نام مالک"
+              name="owner_name"
+              value={formData.owner_name}
+              onChange={handleInputChange}
+              placeholder="نام مالک را وارد کنید"
+              required
+              fullWidth
+            />
+            {validationErrors.owner_name && (
+              <p className="text-red-400 text-sm mt-1">{validationErrors.owner_name}</p>
+            )}
+          </div>
+          
+          <div>
+            <Input
+              label="شماره موبایل مالک"
+              name="owner_mobile"
+              value={formData.owner_mobile}
+              onChange={handleInputChange}
+              placeholder="شماره موبایل را وارد کنید"
+              required
+              fullWidth
+            />
+            {validationErrors.owner_mobile && (
+              <p className="text-red-400 text-sm mt-1">{validationErrors.owner_mobile}</p>
+            )}
+          </div>
+
+          <div>
+            <Input
+              label="ایمیل"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="ایمیل گیم نت را وارد کنید"
+              required
+              fullWidth
+            />
+            {validationErrors.email && (
+              <p className="text-red-400 text-sm mt-1">{validationErrors.email}</p>
+            )}
+          </div>
+          
+          <div>
+            <Input
+              label="آدرس"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="آدرس گیم نت را وارد کنید"
+              required
+              fullWidth
+            />
+            {validationErrors.address && (
+              <p className="text-red-400 text-sm mt-1">{validationErrors.address}</p>
+            )}
+          </div>
+
+
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
@@ -512,7 +654,7 @@ function GamenetsPageContent() {
             </label>
             <input
               type="file"
-              name="licenseAttachment"
+              name="license_attachment"
               onChange={handleInputChange}
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
               className="w-full px-3 py-2 bg-gray-900/50 border border-gray-600/50 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-purple-600 file:text-white hover:file:bg-purple-700"
@@ -520,6 +662,22 @@ function GamenetsPageContent() {
             <p className="text-xs text-gray-400">
               فرمت‌های مجاز: PDF, JPG, JPEG, PNG, DOC, DOCX
             </p>
+            
+            {/* Upload Progress Bar */}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-300">در حال آپلود...</span>
+                  <span className="text-purple-400 font-medium">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-700/50 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center justify-end gap-2 pt-4">
@@ -568,7 +726,7 @@ function GamenetsPageContent() {
           {gamenetToDelete && (
             <div className="text-gray-300 text-sm">
               <p className="font-medium">{gamenetToDelete.name}</p>
-              <p className="text-gray-400">مالک: {gamenetToDelete.ownerName}</p>
+              <p className="text-gray-400">مالک: {gamenetToDelete.owner_name}</p>
             </div>
           )}
           <p className="text-gray-400 text-sm mt-4">
@@ -576,6 +734,7 @@ function GamenetsPageContent() {
           </p>
         </div>
       </Modal>
+
     </ContentArea>
   );
 }

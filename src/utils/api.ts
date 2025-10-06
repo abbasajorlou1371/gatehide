@@ -9,6 +9,16 @@ const RETRY_DELAY = 1000; // 1 second
 export interface ApiResponse<T = unknown> {
   message: string;
   data: T;
+  pagination?: PaginationInfo;
+}
+
+export interface PaginationInfo {
+  current_page: number;
+  page_size: number;
+  total_items: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
 }
 
 export interface ApiErrorResponse {
@@ -91,9 +101,11 @@ class ApiClient {
     const controller = this.createAbortController(this.timeout);
     const url = `${this.baseURL}${endpoint}`;
     
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-    };
+    // Don't set Content-Type for FormData, let browser set it with boundary
+    const defaultHeaders: Record<string, string> = {};
+    if (!(options.body instanceof FormData)) {
+      defaultHeaders['Content-Type'] = 'application/json';
+    }
 
     const config: RequestInit = {
       ...options,
@@ -257,6 +269,78 @@ class ApiClient {
         ...options.headers,
         Authorization: `Bearer ${token}`,
       },
+    });
+  }
+
+  // Authenticated request with upload progress
+  async authenticatedRequestWithProgress<T>(
+    endpoint: string,
+    token: string,
+    options: RequestInit = {},
+    onProgress?: (progress: number) => void
+  ): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    // Don't set Content-Type for FormData, let browser set it with boundary
+    const defaultHeaders: Record<string, string> = {};
+    if (!(options.body instanceof FormData)) {
+      defaultHeaders['Content-Type'] = 'application/json';
+    }
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      // Set up progress tracking
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable && onProgress) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          onProgress(progress);
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (error) {
+            reject(new Error('خطا در پردازش پاسخ سرور'));
+          }
+        } else {
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+            reject(new Error(errorResponse.error || 'خطا در اتصال به سرور'));
+          } catch {
+            reject(new Error('خطا در اتصال به سرور'));
+          }
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('خطا در اتصال به سرور'));
+      });
+
+      xhr.addEventListener('timeout', () => {
+        reject(new Error('زمان اتصال به سرور به پایان رسید'));
+      });
+
+      // Set timeout
+      xhr.timeout = this.timeout;
+
+      // Open and configure request
+      xhr.open(options.method || 'GET', url, true);
+      
+      // Set headers
+      Object.entries({
+        ...defaultHeaders,
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      }).forEach(([key, value]) => {
+        xhr.setRequestHeader(key, value);
+      });
+
+      // Send request
+      xhr.send(options.body as XMLHttpRequestBodyInit | null);
     });
   }
 
