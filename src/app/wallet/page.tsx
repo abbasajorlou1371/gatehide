@@ -4,13 +4,23 @@ import { useState, useEffect } from 'react';
 import ContentArea from "../../components/ContentArea";
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Card, Button, Badge, Input, Modal } from "../../components/ui";
+
+interface Transaction {
+  id: number;
+  type: string;
+  amount: number;
+  date: string;
+  status?: string;
+  description: string;
+}
+
 function WalletPageContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const [chargeAmount, setChargeAmount] = useState('');
   const [showChargeModal, setShowChargeModal] = useState(false);
   const [isCharging, setIsCharging] = useState(false);
-  const [recentTransactions, setRecentTransactions] = useState([
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([
     {
       id: 1,
       type: 'charge',
@@ -19,20 +29,32 @@ function WalletPageContent() {
       status: 'completed',
       description: 'شارژ کیف پول'
     },
+    {
       id: 2,
       type: 'payment',
       amount: -150000,
       date: '2024-01-14',
+      status: 'completed',
       description: 'پرداخت اشتراک ماهانه'
+    },
+    {
       id: 3,
+      type: 'charge',
       amount: 1000000,
       date: '2024-01-10',
+      status: 'completed',
+      description: 'شارژ کیف پول'
+    },
+    {
       id: 4,
+      type: 'payment',
       amount: -75000,
       date: '2024-01-08',
+      status: 'completed',
       description: 'خرید سرویس اضافی'
     }
   ]);
+
   // Mock wallet balance - replace with actual API call
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,10 +64,13 @@ function WalletPageContent() {
     
     return () => clearTimeout(timer);
   }, []);
+
   const handleChargeWallet = async () => {
     if (!chargeAmount || parseFloat(chargeAmount) <= 0) {
       alert('لطفاً مبلغ معتبری وارد کنید');
       return;
+    }
+    
     setIsCharging(true);
     // Simulate API call
     setTimeout(() => {
@@ -53,7 +78,7 @@ function WalletPageContent() {
       setWalletBalance(prev => prev + amount);
       
       // Add new transaction
-      const newTransaction = {
+      const newTransaction: Transaction = {
         id: Date.now(),
         type: 'charge',
         amount: amount,
@@ -68,12 +93,19 @@ function WalletPageContent() {
       alert('کیف پول با موفقیت شارژ شد!');
     }, 2000);
   };
+
   const formatAmount = (amount: number) => {
     return amount.toLocaleString('fa-IR');
+  };
+
   const getTransactionIcon = (type: string) => {
     return type === 'charge' ? '💰' : '💳';
+  };
+
   const getTransactionColor = (type: string) => {
     return type === 'charge' ? 'text-green-400' : 'text-red-400';
+  };
+
   return (
     <ContentArea className="space-y-6">
       {/* Wallet Header */}
@@ -86,7 +118,9 @@ function WalletPageContent() {
           <Badge variant="success" size="lg">
             💳 کیف پول فعال
           </Badge>
+        </div>
       </div>
+
       {/* Wallet Balance Card */}
       <Card className="gx-neon hover:scale-[1.02] transition-transform duration-200 ease-out">
         <div className="text-center py-8">
@@ -103,7 +137,9 @@ function WalletPageContent() {
           >
             💰 شارژ کیف پول
           </Button>
+        </div>
       </Card>
+
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card hover className="gx-neon card-wave">
@@ -114,20 +150,36 @@ function WalletPageContent() {
             <Button variant="outline" size="sm" className="btn-wave">
               پرداخت
             </Button>
+          </div>
         </Card>
+        <Card hover className="gx-neon card-wave">
+          <div className="text-center p-6">
             <div className="text-4xl mb-3 icon-wave">📊</div>
             <h3 className="text-lg font-semibold text-cyan-300 mb-2">گزارش مالی</h3>
             <p className="text-gray-400 text-sm mb-4">مشاهده گزارش‌های تفصیلی</p>
+            <Button variant="outline" size="sm" className="btn-wave">
               مشاهده
+            </Button>
+          </div>
+        </Card>
+        <Card hover className="gx-neon card-wave">
+          <div className="text-center p-6">
             <div className="text-4xl mb-3 icon-wave">⚙️</div>
             <h3 className="text-lg font-semibold text-blue-300 mb-2">تنظیمات</h3>
             <p className="text-gray-400 text-sm mb-4">مدیریت تنظیمات پرداخت</p>
+            <Button variant="outline" size="sm" className="btn-wave">
               تنظیمات
+            </Button>
+          </div>
+        </Card>
+      </div>
+
       {/* Recent Transactions */}
       <Card className="gx-neon">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-blue-300">تراکنش‌های اخیر</h3>
           <Badge variant="primary">30 روز گذشته</Badge>
+        </div>
         <div className="space-y-4">
           {recentTransactions.map((transaction) => (
             <div key={transaction.id} className="flex items-center gap-4 p-4 rounded-lg bg-gray-800/50">
@@ -146,8 +198,12 @@ function WalletPageContent() {
                 >
                   {transaction.status === 'completed' ? 'تکمیل شده' : 'در انتظار'}
                 </Badge>
+              </div>
             </div>
           ))}
+        </div>
+      </Card>
+
       {/* Charge Wallet Modal */}
       <Modal
         isOpen={showChargeModal}
@@ -166,6 +222,7 @@ function WalletPageContent() {
               placeholder="مبلغ مورد نظر را وارد کنید"
               className="w-full"
             />
+          </div>
           
           <div className="grid grid-cols-3 gap-3">
             {[50000, 100000, 200000, 500000, 1000000, 2000000].map((amount) => (

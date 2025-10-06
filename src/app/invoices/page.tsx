@@ -39,6 +39,7 @@ function InvoicesPageContent() {
         issueDate: '2024-01-01',
         description: 'اشتراک ماهانه گیم نت'
       },
+      {
         id: '2',
         invoiceNumber: 'INV-2024-002',
         gamenetName: 'گیم نت پارس',
@@ -49,6 +50,8 @@ function InvoicesPageContent() {
         dueDate: '2024-01-20',
         issueDate: '2024-01-05',
         description: 'اشتراک سه ماهه گیم نت'
+      },
+      {
         id: '3',
         invoiceNumber: 'INV-2024-003',
         gamenetName: 'گیم نت تهران',
@@ -59,17 +62,25 @@ function InvoicesPageContent() {
         dueDate: '2024-01-10',
         issueDate: '2023-12-25',
         description: 'اشتراک هفتگی گیم نت'
+      },
+      {
         id: '4',
         invoiceNumber: 'INV-2024-004',
         gamenetName: 'گیم نت اصفهان',
         pricePerDevice: 60000,
+        devicesCount: 5,
         totalAmount: 300000,
+        status: 'pending',
         dueDate: '2024-01-25',
         issueDate: '2024-01-10',
         description: 'اشتراک شش ماهه گیم نت'
+      },
+      {
         id: '5',
         invoiceNumber: 'INV-2024-005',
         gamenetName: 'گیم نت شیراز',
+        pricePerDevice: 15000,
+        devicesCount: 5,
         totalAmount: 75000,
         status: 'cancelled',
         dueDate: '2024-01-12',
@@ -102,34 +113,49 @@ function InvoicesPageContent() {
   };
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fa-IR').format(amount) + ' ریال';
+  };
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fa-IR');
+  };
+  
   const handleViewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setIsModalOpen(true);
+  };
+  
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedInvoice(null);
+  };
+  
   const handleMarkAsPaid = (invoiceId: string) => {
     setInvoices(prev => prev.map(invoice => 
       invoice.id === invoiceId 
         ? { ...invoice, status: 'paid' as const }
         : invoice
     ));
+  };
+  
   // const handleSendReminder = (invoiceId: string) => {
   //   // Implement send reminder logic
   //   console.log('Sending reminder for invoice:', invoiceId);
   // };
+  
   // Paginate data
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedInvoices = filteredInvoices.slice(startIndex, endIndex);
+  
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+  
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+  };
   // Table columns configuration
   const columns: TableColumn<Invoice>[] = [
     {
@@ -140,28 +166,53 @@ function InvoicesPageContent() {
         <span className="font-mono text-sm text-gray-300">#{String(value)}</span>
       )
     },
+    {
       key: 'gamenetName',
       label: 'نام گیم نت',
+      render: (value) => (
         <span className="font-medium text-white">{String(value)}</span>
+      )
+    },
+    {
       key: 'pricePerDevice',
       label: 'قیمت هر دستگاه',
+      render: (value) => (
         <span className="text-blue-400">
           {formatCurrency(Number(value))}
         </span>
+      )
+    },
+    {
       key: 'devicesCount',
       label: 'تعداد دستگاه',
+      render: (value) => (
         <span className="text-yellow-400 font-semibold">
           {String(value)} دستگاه
+        </span>
+      )
+    },
+    {
       key: 'totalAmount',
       label: 'مبلغ کل',
+      render: (value) => (
         <span className="font-semibold text-green-400">
+          {formatCurrency(Number(value))}
+        </span>
+      )
+    },
+    {
       key: 'status',
       label: 'وضعیت',
       render: (value) => getStatusBadge(value as Invoice['status'])
+    },
+    {
       key: 'dueDate',
       label: 'تاریخ سررسید',
+      render: (value) => (
         <span className="text-gray-400 text-sm">
           {formatDate(String(value))}
+        </span>
+      )
     }
   ];
   const handlePrintInvoice = (invoice: Invoice) => {
@@ -296,16 +347,23 @@ function InvoicesPageContent() {
         </html>
       `);
       printWindow.document.close();
+    }
+  };
   // Table actions configuration
   const actions: TableAction<Invoice>[] = [
+    {
       label: 'مشاهده',
       icon: '👁️',
       onClick: (invoice) => handleViewInvoice(invoice),
       variant: 'outline'
+    },
+    {
       label: 'چاپ فاکتور',
       icon: '🖨️',
       onClick: (invoice) => handlePrintInvoice(invoice),
       variant: 'secondary'
+    }
+  ];
   // Calculate totals
   const totalInvoices = invoices.length;
   const paidInvoices = invoices.filter(i => i.status === 'paid').length;
@@ -336,18 +394,48 @@ function InvoicesPageContent() {
               <div className="text-sm text-gray-400">کل فاکتورها</div>
               <div className="text-lg font-semibold text-white">
                 {totalInvoices}
+              </div>
+            </div>
+          </div>
+        </div>
         
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">✅</span>
+            <div>
               <div className="text-sm text-gray-400">پرداخت شده</div>
               <div className="text-lg font-semibold text-green-400">
                 {paidInvoices}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">⏳</span>
+            <div>
               <div className="text-sm text-gray-400">در انتظار</div>
               <div className="text-lg font-semibold text-yellow-400">
                 {pendingInvoices}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">💰</span>
+            <div>
               <div className="text-sm text-gray-400">کل درآمد</div>
+              <div className="text-lg font-semibold text-green-400">
                 {formatCurrency(totalRevenue)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Search */}
       <div className="relative">
         <input
@@ -359,6 +447,9 @@ function InvoicesPageContent() {
         />
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
           🔍
+        </div>
+      </div>
+      
       {/* Invoices Table */}
       <Table
         data={paginatedInvoices}
@@ -376,6 +467,7 @@ function InvoicesPageContent() {
         totalItems={filteredInvoices.length}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
+      />
       {/* Invoice Detail Modal */}
       <Modal
         isOpen={isModalOpen}
@@ -400,15 +492,21 @@ function InvoicesPageContent() {
                 <label className="text-sm text-gray-400">تعداد دستگاه</label>
                 <p className="text-yellow-400 font-semibold">
                   {selectedInvoice.devicesCount} دستگاه
+                </p>
                 <label className="text-sm text-gray-400">مبلغ کل</label>
                 <p className="font-semibold text-green-400">
                   {formatCurrency(selectedInvoice.totalAmount)}
+                </p>
                 <label className="text-sm text-gray-400">تاریخ صدور</label>
                 <p>{formatDate(selectedInvoice.issueDate)}</p>
                 <label className="text-sm text-gray-400">تاریخ سررسید</label>
                 <p>{formatDate(selectedInvoice.dueDate)}</p>
-              <label className="text-sm text-gray-400">توضیحات</label>
-              <p className="mt-1">{selectedInvoice.description}</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-400">توضیحات</label>
+                <p className="mt-1">{selectedInvoice.description}</p>
+              </div>
+            </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" onClick={handleCloseModal}>
                 بستن
@@ -424,6 +522,8 @@ function InvoicesPageContent() {
                   علامت‌گذاری به عنوان پرداخت شده
                 </Button>
               )}
+            </div>
+          </div>
         )}
       </Modal>
     </ContentArea>

@@ -1,3 +1,5 @@
+import { User } from '../types/auth';
+
 // Security utilities for handling authentication tokens and sensitive data
 
 export interface PasswordValidationResult {
@@ -151,11 +153,11 @@ export class SecurityUtils {
   }
 
   // User data management
-  static setUser(user: any, rememberMe: boolean = false): void {
+  static setUser(user: User, rememberMe: boolean = false): void {
     this.setItem(this.USER_KEY, JSON.stringify(user), rememberMe);
   }
 
-  static getUser(): any | null {
+  static getUser(): User | null {
     const userData = this.getItem(this.USER_KEY);
     if (!userData) return null;
     

@@ -484,7 +484,7 @@ function DevicesPageContent() {
             </div>
             {searchTerm && (
               <div className="mt-2 text-xs text-gray-400">
-                {filteredDevices.length} نتیجه برای "{searchTerm}"
+                {filteredDevices.length} نتیجه برای &quot;{searchTerm}&quot;
               </div>
             )}
           </div>

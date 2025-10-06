@@ -1,10 +1,12 @@
+import { User } from '../types/auth';
+
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 const API_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   message: string;
   data: T;
 }
@@ -51,24 +53,26 @@ class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     
     // Store timeout ID for cleanup
-    (controller.signal as any).timeoutId = timeoutId;
+    (controller.signal as AbortSignal & { timeoutId?: NodeJS.Timeout }).timeoutId = timeoutId;
     
     return controller;
   }
 
   // Cleanup abort controller
   private cleanupAbortController(controller: AbortController): void {
-    const timeoutId = (controller.signal as any).timeoutId;
+    const timeoutId = (controller.signal as AbortSignal & { timeoutId?: NodeJS.Timeout }).timeoutId;
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
   }
 
   // Determine if error is retryable
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
     // Network errors
-    if (error.name === 'AbortError') return true;
-    if (error.message?.includes('network') || error.message?.includes('fetch')) return true;
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') return true;
+    if (error && typeof error === 'object' && 'message' in error && 
+        typeof error.message === 'string' && 
+        (error.message.includes('network') || error.message.includes('fetch'))) return true;
     
     // HTTP status codes that should be retried
     if (error instanceof ApiError) {
@@ -189,7 +193,7 @@ class ApiClient {
       return await this.makeRequest<ApiResponse<{
         token: string;
         user_type: 'user' | 'admin';
-        user: any;
+        user: User;
         expires_at: string;
       }>>('/auth/login', {
         method: 'POST',
@@ -224,7 +228,7 @@ class ApiClient {
 
   // Protected methods (authentication required)
   async getProfile(token: string) {
-    return this.makeRequest<ApiResponse<any>>('/profile', {
+    return this.makeRequest<ApiResponse<User>>('/profile', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -233,7 +237,7 @@ class ApiClient {
   }
 
   async logout(token: string) {
-    return this.makeRequest<ApiResponse<{}>>('/auth/logout', {
+    return this.makeRequest<ApiResponse<Record<string, never>>>('/auth/logout', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

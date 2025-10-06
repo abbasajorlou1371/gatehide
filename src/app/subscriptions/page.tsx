@@ -5,6 +5,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { Button, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
+
 interface SubscriptionPlan extends Record<string, unknown> {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ interface SubscriptionPlan extends Record<string, unknown> {
   isActive: boolean;
   createdAt: string;
 }
+
 function SubscriptionsPageContent() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,6 +27,7 @@ function SubscriptionsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -34,6 +37,7 @@ function SubscriptionsPageContent() {
     features: '',
     isActive: true
   });
+
   useEffect(() => {
     // Mock data - replace with actual API calls
     const mockPlans: SubscriptionPlan[] = [
@@ -47,35 +51,48 @@ function SubscriptionsPageContent() {
         isActive: true,
         createdAt: '2024-01-15'
       },
+      {
         id: '2',
         name: 'پلن حرفه‌ای',
         description: 'پلن مناسب برای کسب‌وکارهای متوسط',
         price: 150000,
         duration: 3,
         features: ['دسترسی به 15 گیم نت', 'پشتیبانی تلفنی', 'گزارشات هفتگی', 'آنالیز پیشرفته'],
+        isActive: true,
         createdAt: '2024-02-20'
+      },
+      {
         id: '3',
         name: 'پلن سازمانی',
         description: 'پلن مناسب برای سازمان‌های بزرگ',
         price: 500000,
         duration: 12,
         features: ['دسترسی نامحدود', 'پشتیبانی 24/7', 'گزارشات روزانه', 'API دسترسی', 'مدیریت چند کاربره'],
+        isActive: true,
         createdAt: '2024-03-10'
+      },
+      {
         id: '4',
         name: 'پلن آزمایشی',
         description: 'پلن رایگان برای تست',
         price: 0,
+        duration: 1,
         features: ['دسترسی به 1 گیم نت', 'پشتیبانی محدود'],
         isActive: false,
         createdAt: '2024-03-25'
+      },
+      {
         id: '5',
         name: 'پلن سالانه',
         description: 'پلن با تخفیف ویژه برای خرید سالانه',
         price: 400000,
+        duration: 12,
         features: ['دسترسی به 20 گیم نت', 'پشتیبانی تلفنی', 'گزارشات ماهانه', 'تخفیف 20%'],
+        isActive: true,
         createdAt: '2024-04-05'
       }
     ];
+
     // Simulate API call
     setIsLoading(true);
     setTimeout(() => {
@@ -83,6 +100,7 @@ function SubscriptionsPageContent() {
       setIsLoading(false);
     }, 1000);
   }, []);
+
   // Table columns configuration
   const columns: TableColumn<SubscriptionPlan>[] = [
     {
@@ -96,28 +114,44 @@ function SubscriptionsPageContent() {
         </div>
       )
     },
+    {
       key: 'description',
       label: 'توضیحات',
       render: (value) => <span className="text-gray-300">{String(value)}</span>
+    },
+    {
       key: 'price',
       label: 'قیمت',
+      render: (value) => (
         <span className="text-gray-300">
           {Number(value) === 0 ? 'رایگان' : `${Number(value).toLocaleString('fa-IR')} تومان`}
         </span>
+      )
+    },
+    {
       key: 'duration',
       label: 'مدت',
       render: (value) => <span className="text-gray-300">{String(value)} ماه</span>
+    },
+    {
       key: 'features',
       label: 'ویژگی‌ها',
       sortable: false,
+      render: (value) => (
         <span className="text-gray-300">{Array.isArray(value) ? value.length : 0} ویژگی</span>
+      )
+    },
+    {
       key: 'isActive',
       label: 'وضعیت',
+      render: (value) => (
         <Badge variant={Boolean(value) ? 'success' : 'secondary'}>
           {Boolean(value) ? 'فعال' : 'غیرفعال'}
         </Badge>
+      )
     }
   ];
+
   const handleAddPlan = () => {
     setEditingPlan(null);
     setFormData({
@@ -130,25 +164,38 @@ function SubscriptionsPageContent() {
     });
     setIsModalOpen(true);
   };
+
   const handleEditPlan = (plan: SubscriptionPlan) => {
     setEditingPlan(plan);
+    setFormData({
       name: plan.name,
       description: plan.description,
       price: plan.price.toString(),
       duration: plan.duration.toString(),
       features: plan.features.join('\n'),
       isActive: plan.isActive
+    });
+    setIsModalOpen(true);
+  };
+
   const handleDeletePlan = (plan: SubscriptionPlan) => {
     setPlanToDelete(plan);
     setIsDeleteModalOpen(true);
+  };
+
   const confirmDelete = () => {
     if (planToDelete) {
       setPlans(prev => prev.filter(p => p.id !== planToDelete.id));
       setPlanToDelete(null);
       setIsDeleteModalOpen(false);
+    }
+  };
+
   const cancelDelete = () => {
     setPlanToDelete(null);
     setIsDeleteModalOpen(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -180,41 +227,60 @@ function SubscriptionsPageContent() {
         createdAt: new Date().toISOString().split('T')[0]
       };
       setPlans(prev => [newPlan, ...prev]);
+    }
     setIsModalOpen(false);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
+  };
+
   // Filter plans based on search term
   const filteredPlans = plans.filter(plan =>
     plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     plan.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     plan.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
   // Paginate data
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedPlans = filteredPlans.slice(startIndex, endIndex);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+  };
+
   // Table actions configuration
   const actions: TableAction<SubscriptionPlan>[] = [
+    {
       label: 'ویرایش',
       icon: '✏️',
       onClick: handleEditPlan,
       variant: 'secondary'
+    },
+    {
       label: 'حذف',
       icon: '🗑️',
       onClick: handleDeletePlan,
       variant: 'danger'
+    }
+  ];
+
   const formatPrice = (price: number) => {
     return price === 0 ? 'رایگان' : `${price.toLocaleString('fa-IR')} تومان`;
+  };
+
   return (
     <ContentArea className="space-y-4 sm:space-y-6" overflow="hidden">
       {/* Header */}
@@ -222,6 +288,7 @@ function SubscriptionsPageContent() {
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold gx-gradient-text">مدیریت پلن‌های اشتراک</h1>
           <p className="text-gray-400 mt-1 text-sm sm:text-base">مدیریت و نظارت بر پلن‌های اشتراک موجود</p>
+        </div>
         <Button
           onClick={handleAddPlan}
           variant="primary"
@@ -232,12 +299,17 @@ function SubscriptionsPageContent() {
           <span className="hidden sm:inline">➕ افزودن پلن</span>
         </Button>
       </div>
+
       {/* Stats */}
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
         <Badge variant="primary" size="md">
           📊 {plans.length} پلن
+        </Badge>
         <Badge variant="success" size="md">
           🟢 {plans.filter(p => p.isActive).length} فعال
+        </Badge>
+      </div>
+
       {/* Search */}
       <div className="relative">
         <input
@@ -249,6 +321,9 @@ function SubscriptionsPageContent() {
         />
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
           🔍
+        </div>
+      </div>
+
       {/* Plans Table */}
       <Table
         data={paginatedPlans}
@@ -259,6 +334,7 @@ function SubscriptionsPageContent() {
         emptyMessage="هیچ پلنی یافت نشد"
         className="gx-neon"
       />
+
       {/* Pagination */}
       <Pagination
         currentPage={currentPage}
