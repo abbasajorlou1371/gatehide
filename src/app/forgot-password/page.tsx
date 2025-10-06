@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
           htmlContainer: 'swal2-content-dark'
         }
       });
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'خطا در ارسال! ❌',
         text: 'خطا در ارسال ایمیل. لطفاً دوباره تلاش کنید',
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
           htmlContainer: 'swal2-content-dark'
         }
       });
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'خطا در ارسال! ❌',
         text: 'خطا در ارسال مجدد ایمیل',

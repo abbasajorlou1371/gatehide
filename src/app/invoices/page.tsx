@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, Table, TableColumn, TableAction, Pagination, Modal, Button } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 
-interface Invoice {
+interface Invoice extends Record<string, unknown> {
   id: string;
   invoiceNumber: string;
   gamenetName: string;
@@ -144,10 +144,10 @@ export default function InvoicesPage() {
     ));
   };
 
-  const handleSendReminder = (invoiceId: string) => {
-    // Implement send reminder logic
-    console.log('Sending reminder for invoice:', invoiceId);
-  };
+  // const handleSendReminder = (invoiceId: string) => {
+  //   // Implement send reminder logic
+  //   console.log('Sending reminder for invoice:', invoiceId);
+  // };
 
   // Paginate data
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
@@ -171,7 +171,7 @@ export default function InvoicesPage() {
       label: 'شماره فاکتور',
       sortable: true,
       render: (value) => (
-        <span className="font-mono text-sm text-gray-300">#{value}</span>
+        <span className="font-mono text-sm text-gray-300">#{String(value)}</span>
       )
     },
     {
@@ -179,7 +179,7 @@ export default function InvoicesPage() {
       label: 'نام گیم نت',
       sortable: true,
       render: (value) => (
-        <span className="font-medium text-white">{value}</span>
+        <span className="font-medium text-white">{String(value)}</span>
       )
     },
     {
@@ -188,7 +188,7 @@ export default function InvoicesPage() {
       sortable: true,
       render: (value) => (
         <span className="text-blue-400">
-          {formatCurrency(value)}
+          {formatCurrency(Number(value))}
         </span>
       )
     },
@@ -198,7 +198,7 @@ export default function InvoicesPage() {
       sortable: true,
       render: (value) => (
         <span className="text-yellow-400 font-semibold">
-          {value} دستگاه
+          {String(value)} دستگاه
         </span>
       )
     },
@@ -208,7 +208,7 @@ export default function InvoicesPage() {
       sortable: true,
       render: (value) => (
         <span className="font-semibold text-green-400">
-          {formatCurrency(value)}
+          {formatCurrency(Number(value))}
         </span>
       )
     },
@@ -216,7 +216,7 @@ export default function InvoicesPage() {
       key: 'status',
       label: 'وضعیت',
       sortable: true,
-      render: (value) => getStatusBadge(value)
+      render: (value) => getStatusBadge(value as Invoice['status'])
     },
     {
       key: 'dueDate',
@@ -224,7 +224,7 @@ export default function InvoicesPage() {
       sortable: true,
       render: (value) => (
         <span className="text-gray-400 text-sm">
-          {formatDate(value)}
+          {formatDate(String(value))}
         </span>
       )
     }
@@ -428,7 +428,7 @@ export default function InvoicesPage() {
   const totalInvoices = invoices.length;
   const paidInvoices = invoices.filter(i => i.status === 'paid').length;
   const pendingInvoices = invoices.filter(i => i.status === 'pending').length;
-  const overdueInvoices = invoices.filter(i => i.status === 'overdue').length;
+  // const overdueInvoices = invoices.filter(i => i.status === 'overdue').length;
   const totalRevenue = invoices
     .filter(i => i.status === 'paid')
     .reduce((sum, i) => sum + i.totalAmount, 0);

@@ -288,7 +288,7 @@ export default function SettingsPage() {
                   </label>
                   <select
                     value={privacy.profileVisibility}
-                    onChange={(e) => setPrivacy(prev => ({ ...prev, profileVisibility: e.target.value as any }))}
+                    onChange={(e) => setPrivacy(prev => ({ ...prev, profileVisibility: e.target.value as 'public' | 'private' | 'friends' }))}
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="public">عمومی</option>

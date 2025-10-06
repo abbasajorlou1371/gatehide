@@ -6,7 +6,7 @@ import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 import Swal from 'sweetalert2';
 
-interface User {
+interface User extends Record<string, unknown> {
   id: string;
   name: string;
   email: string;
@@ -294,7 +294,7 @@ export default function UsersPage() {
       render: (value) => (
         <div className="flex items-center gap-3">
           <span className="text-2xl">👤</span>
-          <span className="font-semibold text-white">{value}</span>
+          <span className="font-semibold text-white">{String(value)}</span>
         </div>
       )
     },
@@ -302,13 +302,13 @@ export default function UsersPage() {
       key: 'email',
       label: 'ایمیل',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'mobile',
       label: 'موبایل',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'balance',
@@ -317,7 +317,7 @@ export default function UsersPage() {
       render: (value, item) => (
         <div className="flex items-center justify-center gap-2 min-w-[200px]">
           <span className="text-green-400 font-semibold">
-            {value.toLocaleString('fa-IR')} تومان
+            {Number(value).toLocaleString('fa-IR')} تومان
           </span>
           <Button
             variant="primary"
@@ -339,8 +339,8 @@ export default function UsersPage() {
       sortable: true,
       render: (value, item) => (
         <div className="flex items-center justify-center gap-2 min-w-[200px]">
-          <span className={`font-semibold ${value > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-            {value.toLocaleString('fa-IR')} تومان
+          <span className={`font-semibold ${Number(value) > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+            {Number(value).toLocaleString('fa-IR')} تومان
           </span>
           <Button
             variant="primary"
@@ -361,8 +361,8 @@ export default function UsersPage() {
       label: 'وضعیت',
       sortable: true,
       render: (value) => (
-        <Badge variant={value === 'active' ? 'success' : 'secondary'}>
-          {value === 'active' ? 'فعال' : 'غیرفعال'}
+        <Badge variant={String(value) === 'active' ? 'success' : 'secondary'}>
+          {String(value) === 'active' ? 'فعال' : 'غیرفعال'}
         </Badge>
       )
     },
@@ -370,7 +370,7 @@ export default function UsersPage() {
       key: 'createdAt',
       label: 'تاریخ عضویت',
       sortable: true,
-      render: (value) => <span className="text-gray-400">{value}</span>
+      render: (value) => <span className="text-gray-400">{String(value)}</span>
     }
   ];
 

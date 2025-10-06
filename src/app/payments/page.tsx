@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 
-interface Payment {
+interface Payment extends Record<string, unknown> {
   id: string;
   gamenetName: string;
   customerName: string;
@@ -338,7 +338,7 @@ export default function PaymentsPage() {
       render: (value) => (
         <div className="flex items-center gap-3">
           <span className="text-2xl">💳</span>
-          <span className="font-mono text-sm text-gray-300">#{value}</span>
+          <span className="font-mono text-sm text-gray-300">#{String(value)}</span>
         </div>
       )
     },
@@ -346,7 +346,7 @@ export default function PaymentsPage() {
       key: 'gamenetName',
       label: 'گیم نت',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'customerName',
@@ -354,8 +354,8 @@ export default function PaymentsPage() {
       sortable: true,
       render: (value, item) => (
         <div>
-          <div className="text-white font-medium">{value}</div>
-          <div className="text-gray-400 text-sm">{item.customerMobile}</div>
+          <div className="text-white font-medium">{String(value)}</div>
+          <div className="text-gray-400 text-sm">{String(item.customerMobile)}</div>
         </div>
       )
     },
@@ -365,7 +365,7 @@ export default function PaymentsPage() {
       sortable: true,
       render: (value) => (
         <span className="text-green-400 font-semibold">
-          {value.toLocaleString('fa-IR')} تومان
+          {Number(value).toLocaleString('fa-IR')} تومان
         </span>
       )
     },
@@ -373,7 +373,7 @@ export default function PaymentsPage() {
       key: 'paymentMethod',
       label: 'روش پرداخت',
       sortable: true,
-      render: (value: string) => {
+      render: (value) => {
         const methodLabels: Record<string, string> = {
           cash: 'نقدی',
           card: 'کارت',
@@ -388,8 +388,8 @@ export default function PaymentsPage() {
         };
         return (
           <div className="flex items-center gap-2">
-            <span>{methodIcons[value] || '❓'}</span>
-            <span className="text-gray-300">{methodLabels[value] || value}</span>
+            <span>{methodIcons[String(value)] || '❓'}</span>
+            <span className="text-gray-300">{methodLabels[String(value)] || String(value)}</span>
           </div>
         );
       }
@@ -398,14 +398,14 @@ export default function PaymentsPage() {
       key: 'status',
       label: 'وضعیت',
       sortable: true,
-      render: (value: string) => {
+      render: (value) => {
         const statusConfig: Record<string, { label: string; variant: 'warning' | 'success' | 'danger' | 'secondary'; icon: string }> = {
           pending: { label: 'در انتظار', variant: 'warning', icon: '⏳' },
           completed: { label: 'تکمیل شده', variant: 'success', icon: '✅' },
           failed: { label: 'ناموفق', variant: 'danger', icon: '❌' },
           refunded: { label: 'برگشت', variant: 'secondary', icon: '↩️' }
         };
-        const config = statusConfig[value] || { label: value, variant: 'secondary' as const, icon: '❓' };
+        const config = statusConfig[String(value)] || { label: String(value), variant: 'secondary' as const, icon: '❓' };
         return (
           <Badge variant={config.variant}>
             <span className="ml-1">{config.icon}</span>
@@ -420,7 +420,7 @@ export default function PaymentsPage() {
       sortable: true,
       render: (value) => (
         <span className="text-gray-400 text-sm">
-          {new Date(value).toLocaleDateString('fa-IR')}
+          {new Date(String(value)).toLocaleDateString('fa-IR')}
         </span>
       )
     }

@@ -20,14 +20,14 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
-  const [token, setToken] = useState('');
+  // const [token, setToken] = useState('');
 
   // Check token validity on component mount
   useEffect(() => {
     // Get token from URL params (in real app, this would come from the reset link)
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token') || 'demo-token-123';
-    setToken(tokenFromUrl);
+    // setToken(tokenFromUrl);
 
     // Simulate token validation
     const validateToken = async () => {
@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Mock validation - in real app, this would be an API call
         setIsTokenValid(tokenFromUrl === 'demo-token-123' || tokenFromUrl === 'valid-token');
-      } catch (error) {
+      } catch {
         setIsTokenValid(false);
       }
     };
@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
         window.location.href = '/login';
       }, 2000);
       
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'خطا در تغییر رمز عبور! ❌',
         text: 'خطا در تغییر رمز عبور. لطفاً دوباره تلاش کنید',

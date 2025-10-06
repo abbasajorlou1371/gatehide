@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
+    // const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
     // Swipe right to close sidebar (when open)

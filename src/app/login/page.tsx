@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button, Input, Badge, Card } from '../../components/ui';
+import { Button, Input, Card } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
@@ -122,7 +122,7 @@ export default function LoginPage() {
         // Redirect to dashboard (in real app)
         // router.push('/');
       }
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'خطا در ورود! ❌',
         text: 'ایمیل یا رمز عبور اشتباه است',
@@ -205,7 +205,7 @@ export default function LoginPage() {
       } else {
         throw new Error('Invalid 2FA code');
       }
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'کد تأیید اشتباه! ❌',
         text: 'لطفاً کد صحیح را وارد کنید',
@@ -255,7 +255,7 @@ export default function LoginPage() {
       
       // Redirect to dashboard (in real app)
       // router.push('/');
-    } catch (error) {
+    } catch {
       await Swal.fire({
         title: 'خطا در QR کد! ❌',
         text: 'QR کد نامعتبر یا منقضی شده است',

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Button, Badge } from './index';
+import { Button } from './index';
 
 export interface TableColumn<T> {
   key: keyof T | string;
   label: string;
   sortable?: boolean;
-  render?: (value: any, item: T) => React.ReactNode;
+  render?: (value: unknown, item: T) => React.ReactNode;
   className?: string;
   width?: string;
 }
@@ -35,7 +35,7 @@ export interface TableProps<T> {
   onRowClick?: (item: T) => void;
 }
 
-export default function Table<T extends Record<string, any>>({
+export default function Table<T extends Record<string, unknown>>({
   data,
   columns,
   actions = [],
@@ -110,7 +110,7 @@ export default function Table<T extends Record<string, any>>({
       return column.render(value, item);
     }
     
-    return value;
+    return String(value);
   };
 
   if (loading) {

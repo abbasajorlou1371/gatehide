@@ -5,7 +5,7 @@ import { Button, Badge, Table, TableColumn, TableAction, Pagination } from '../.
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 
-interface SubscriptionPlan {
+interface SubscriptionPlan extends Record<string, unknown> {
   id: string;
   name: string;
   description: string;
@@ -109,7 +109,7 @@ export default function SubscriptionsPage() {
       render: (value) => (
         <div className="flex items-center gap-3">
           <span className="text-2xl">📋</span>
-          <span className="font-semibold text-white">{value}</span>
+          <span className="font-semibold text-white">{String(value)}</span>
         </div>
       )
     },
@@ -117,7 +117,7 @@ export default function SubscriptionsPage() {
       key: 'description',
       label: 'توضیحات',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'price',
@@ -125,7 +125,7 @@ export default function SubscriptionsPage() {
       sortable: true,
       render: (value) => (
         <span className="text-gray-300">
-          {value === 0 ? 'رایگان' : `${value.toLocaleString('fa-IR')} تومان`}
+          {Number(value) === 0 ? 'رایگان' : `${Number(value).toLocaleString('fa-IR')} تومان`}
         </span>
       )
     },
@@ -133,14 +133,14 @@ export default function SubscriptionsPage() {
       key: 'duration',
       label: 'مدت',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value} ماه</span>
+      render: (value) => <span className="text-gray-300">{String(value)} ماه</span>
     },
     {
       key: 'features',
       label: 'ویژگی‌ها',
       sortable: false,
       render: (value) => (
-        <span className="text-gray-300">{value.length} ویژگی</span>
+        <span className="text-gray-300">{Array.isArray(value) ? value.length : 0} ویژگی</span>
       )
     },
     {
@@ -148,8 +148,8 @@ export default function SubscriptionsPage() {
       label: 'وضعیت',
       sortable: true,
       render: (value) => (
-        <Badge variant={value ? 'success' : 'secondary'}>
-          {value ? 'فعال' : 'غیرفعال'}
+        <Badge variant={Boolean(value) ? 'success' : 'secondary'}>
+          {Boolean(value) ? 'فعال' : 'غیرفعال'}
         </Badge>
       )
     }

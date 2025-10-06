@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 
-interface Transaction {
+interface Transaction extends Record<string, unknown> {
   id: string;
   type: 'income' | 'expense' | 'transfer' | 'refund';
   category: string;
@@ -120,7 +120,7 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-3">
           <span className="text-2xl">📈</span>
           <div>
-            <div className="font-mono text-sm text-gray-300">#{value}</div>
+            <div className="font-mono text-sm text-gray-300">#{String(value)}</div>
             {item.reference && (
               <div className="text-xs text-gray-500">{item.reference}</div>
             )}
@@ -152,7 +152,7 @@ export default function TransactionsPage() {
       key: 'category',
       label: 'دسته‌بندی',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'description',
@@ -160,9 +160,9 @@ export default function TransactionsPage() {
       sortable: true,
       render: (value, item) => (
         <div>
-          <div className="text-white">{value}</div>
+          <div className="text-white">{String(value)}</div>
           {item.gamenetName && (
-            <div className="text-gray-400 text-sm">گیم نت: {item.gamenetName}</div>
+            <div className="text-gray-400 text-sm">گیم نت: {String(item.gamenetName)}</div>
           )}
         </div>
       )
@@ -172,10 +172,10 @@ export default function TransactionsPage() {
       label: 'مبلغ',
       sortable: true,
       render: (value) => {
-        const isPositive = value >= 0;
+        const isPositive = Number(value) >= 0;
         return (
           <span className={`font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            {isPositive ? '+' : ''}{value.toLocaleString('fa-IR')} تومان
+            {isPositive ? '+' : ''}{Number(value).toLocaleString('fa-IR')} تومان
           </span>
         );
       }
@@ -191,7 +191,7 @@ export default function TransactionsPage() {
           failed: { label: 'ناموفق', variant: 'danger' as const, icon: '❌' },
           cancelled: { label: 'لغو شده', variant: 'secondary' as const, icon: '🚫' }
         };
-        const config = statusConfig[value as keyof typeof statusConfig];
+        const config = statusConfig[String(value) as keyof typeof statusConfig];
         return (
           <Badge variant={config.variant}>
             <span className="ml-1">{config.icon}</span>
@@ -206,7 +206,7 @@ export default function TransactionsPage() {
       sortable: true,
       render: (value) => (
         <span className="text-gray-400 text-sm">
-          {new Date(value).toLocaleDateString('fa-IR')}
+          {new Date(String(value)).toLocaleDateString('fa-IR')}
         </span>
       )
     }

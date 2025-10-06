@@ -5,7 +5,7 @@ import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } fro
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 
-interface Gamenet {
+interface Gamenet extends Record<string, unknown> {
   id: string;
   name: string;
   ownerName: string;
@@ -134,7 +134,7 @@ export default function GamenetsPage() {
       render: (value) => (
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎮</span>
-          <span className="font-semibold text-white">{value}</span>
+          <span className="font-semibold text-white">{String(value)}</span>
         </div>
       )
     },
@@ -142,19 +142,19 @@ export default function GamenetsPage() {
       key: 'ownerName',
       label: 'مالک',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'ownerMobile',
       label: 'موبایل',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'email',
       label: 'ایمیل',
       sortable: true,
-      render: (value) => <span className="text-gray-300">{value}</span>
+      render: (value) => <span className="text-gray-300">{String(value)}</span>
     },
     {
       key: 'domain',
@@ -162,7 +162,7 @@ export default function GamenetsPage() {
       sortable: true,
       render: (value) => (
         <span className="text-blue-400 hover:text-blue-300 cursor-pointer">
-          gatehide.com/{value}
+          gatehide.com/{String(value)}
         </span>
       )
     },
@@ -172,7 +172,7 @@ export default function GamenetsPage() {
       sortable: true,
       render: (value) => (
         <div className="text-green-400 font-semibold text-lg">
-          {value || 0}
+          {String(value) || 0}
         </div>
       )
     },
@@ -182,7 +182,7 @@ export default function GamenetsPage() {
       sortable: true,
       render: (value) => (
         <div className="text-red-400 font-semibold text-lg">
-          {value || 0}
+          {String(value) || 0}
         </div>
       )
     },
@@ -190,7 +190,7 @@ export default function GamenetsPage() {
       key: 'address',
       label: 'آدرس',
       sortable: true,
-      render: (value) => <span className="text-gray-300 truncate max-w-xs">{value}</span>
+      render: (value) => <span className="text-gray-300 truncate max-w-xs">{String(value)}</span>
     },
     {
       key: 'status',
@@ -206,7 +206,7 @@ export default function GamenetsPage() {
       key: 'createdAt',
       label: 'تاریخ ایجاد',
       sortable: true,
-      render: (value) => <span className="text-gray-400">{value}</span>
+      render: (value) => <span className="text-gray-400">{String(value)}</span>
     }
   ];
 

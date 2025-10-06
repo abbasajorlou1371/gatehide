@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -47,9 +48,11 @@ function UserDropdown() {
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <img
+        <Image
           src={user.image}
           alt={user.name}
+          width={32}
+          height={32}
           className="w-8 h-8 rounded-full border border-gray-500"
         />
         <span className="font-medium text-white text-sm">{user.name}</span>

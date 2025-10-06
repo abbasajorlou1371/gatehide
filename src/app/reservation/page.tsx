@@ -6,7 +6,7 @@ import ContentArea from '../../components/ContentArea';
 import Swal from 'sweetalert2';
 
 // Device interface
-interface Device {
+interface Device extends Record<string, unknown> {
   id: string;
   name: string;
   macAddress: string;
@@ -348,9 +348,9 @@ export default function DevicesPage() {
       sortable: true,
       render: (value, device) => (
         <div className="flex flex-col">
-          <span className="font-medium text-white">{value}</span>
+          <span className="font-medium text-white">{String(value)}</span>
           {device.location && (
-            <span className="text-xs text-gray-400">{device.location}</span>
+            <span className="text-xs text-gray-400">{String(device.location)}</span>
           )}
         </div>
       )
@@ -359,13 +359,13 @@ export default function DevicesPage() {
       key: 'status',
       label: 'وضعیت',
       sortable: true,
-      render: (value) => getStatusBadge(value)
+      render: (value) => getStatusBadge(value as Device['status'])
     },
     {
       key: 'isFree',
       label: 'دسترسی',
       sortable: true,
-      render: (value) => getAvailabilityBadge(value)
+      render: (value) => getAvailabilityBadge(Boolean(value))
     },
     {
       key: 'reservationCount',
@@ -373,7 +373,7 @@ export default function DevicesPage() {
       sortable: true,
       render: (value, device) => (
         <div className="flex items-center gap-2">
-          <span className="text-white font-medium">{value}</span>
+          <span className="text-white font-medium">{String(value)}</span>
           <Button
             variant="secondary"
             size="sm"
@@ -391,7 +391,7 @@ export default function DevicesPage() {
       sortable: true,
       render: (value) => (
         <span className="text-green-400 font-medium">
-          {value.toLocaleString('fa-IR')} تومان
+          {Number(value).toLocaleString('fa-IR')} تومان
         </span>
       )
     }
@@ -509,7 +509,7 @@ export default function DevicesPage() {
           </div>
           {searchTerm && (
             <div className="mt-2 text-xs text-gray-400">
-              {filteredDevices.length} نتیجه برای "{searchTerm}"
+              {filteredDevices.length} نتیجه برای &quot;{searchTerm}&quot;
             </div>
           )}
         </div>
