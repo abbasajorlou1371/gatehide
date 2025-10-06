@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -31,10 +31,37 @@ export default function Modal({
   secondaryAction
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [animationState, setAnimationState] = useState<'entering' | 'entered' | 'exiting' | 'exited'>('exited');
+  const [shouldRender, setShouldRender] = useState(false);
+
+  // Handle animation states
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      setAnimationState('entering');
+      
+      // Start entering animation
+      const enteringTimer = setTimeout(() => {
+        setAnimationState('entered');
+      }, 10); // Small delay to ensure DOM is ready
+      
+      return () => clearTimeout(enteringTimer);
+    } else {
+      setAnimationState('exiting');
+      
+      // Wait for exit animation to complete before unmounting
+      const exitingTimer = setTimeout(() => {
+        setShouldRender(false);
+        setAnimationState('exited');
+      }, 300); // Match the transition duration
+      
+      return () => clearTimeout(exitingTimer);
+    }
+  }, [isOpen]);
 
   // Handle focus management and prevent body scroll
   useEffect(() => {
-    if (!isOpen) return;
+    if (!shouldRender) return;
 
     // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
@@ -47,26 +74,26 @@ export default function Modal({
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [shouldRender]);
 
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && shouldRender && animationState === 'entered') {
         onClose();
       }
     };
 
-    if (isOpen) {
+    if (shouldRender) {
       document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onClose]);
+  }, [shouldRender, animationState, onClose]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
   
   const sizeClasses = {
     sm: 'max-w-md',
@@ -79,8 +106,12 @@ export default function Modal({
     <>
       {/* Modal backdrop */}
       <div 
-        className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full bg-black/70 backdrop-blur-md transition-opacity z-40"
-        onClick={onClose}
+        className={`fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full bg-black/70 backdrop-blur-md transition-opacity duration-300 z-40 ${
+          animationState === 'entering' ? 'opacity-0' : 
+          animationState === 'entered' ? 'opacity-100' : 
+          animationState === 'exiting' ? 'opacity-0' : 'opacity-0'
+        }`}
+        onClick={animationState === 'entered' ? onClose : undefined}
         aria-hidden="true"
         style={{ 
           position: 'fixed',
@@ -111,8 +142,10 @@ export default function Modal({
         {/* Modal content */}
         <div 
           ref={modalRef}
-          className={`gx-glass gx-neon rounded-2xl border-2 border-purple-500/40 shadow-[0_0_50px_rgba(168,85,247,0.3)] w-full max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0 ${
-            isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          className={`gx-glass gx-neon rounded-2xl border-2 border-purple-500/40 shadow-[0_0_50px_rgba(168,85,247,0.3)] w-full max-h-[90vh] flex flex-col transform transition-all duration-300 ${
+            animationState === 'entering' ? 'scale-95 opacity-0 translate-y-4' : 
+            animationState === 'entered' ? 'scale-100 opacity-100 translate-y-0' : 
+            animationState === 'exiting' ? 'scale-95 opacity-0 translate-y-4' : 'scale-95 opacity-0 translate-y-4'
           } ${sizeClasses[size]}`}
           role="dialog"
           aria-modal="true"
