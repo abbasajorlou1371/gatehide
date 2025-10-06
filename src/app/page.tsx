@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import ContentArea from "../components/ContentArea";
 import { Card, Badge } from "../components/ui";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../hooks/useAuth";
 
-export default function Dashboard() {
+function DashboardContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [animatedStats, setAnimatedStats] = useState({
     players: 0,
@@ -12,6 +14,7 @@ export default function Dashboard() {
     servers: 0,
     onlinePlayers: 0
   });
+  const { user, userType } = useAuth();
 
   // Mock data for gamenet management
   const gamenetData = [
@@ -348,5 +351,13 @@ export default function Dashboard() {
         </div>
       </Card>
     </ContentArea>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

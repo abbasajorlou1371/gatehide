@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import Swal from 'sweetalert2';
 
 interface User extends Record<string, unknown> {
@@ -27,7 +28,7 @@ interface DebtTransaction {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-export default function UsersPage() {
+function UsersPageContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -916,5 +917,13 @@ export default function UsersPage() {
       </Modal>
 
     </ContentArea>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <ProtectedRoute>
+      <UsersPageContent />
+    </ProtectedRoute>
   );
 }

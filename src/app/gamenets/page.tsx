@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
+import ProtectedRoute from '../../components/ProtectedRoute';
 
 interface Gamenet extends Record<string, unknown> {
   id: string;
@@ -20,7 +21,7 @@ interface Gamenet extends Record<string, unknown> {
   status: 'active' | 'inactive';
 }
 
-export default function GamenetsPage() {
+function GamenetsPageContent() {
   const [gamenets, setGamenets] = useState<Gamenet[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -576,5 +577,13 @@ export default function GamenetsPage() {
         </div>
       </Modal>
     </ContentArea>
+  );
+}
+
+export default function GamenetsPage() {
+  return (
+    <ProtectedRoute>
+      <GamenetsPageContent />
+    </ProtectedRoute>
   );
 }

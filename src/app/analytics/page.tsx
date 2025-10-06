@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Badge, Card } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import ProtectedRoute from '../../components/ProtectedRoute';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -32,7 +33,7 @@ interface AnalyticsData {
   }>;
 }
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
@@ -381,5 +382,13 @@ export default function AnalyticsPage() {
         </div>
       </Card>
     </ContentArea>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <ProtectedRoute>
+      <AnalyticsPageContent />
+    </ProtectedRoute>
   );
 }

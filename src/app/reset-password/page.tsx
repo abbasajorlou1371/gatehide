@@ -20,14 +20,12 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
-  // const [token, setToken] = useState('');
 
   // Check token validity on component mount
   useEffect(() => {
     // Get token from URL params (in real app, this would come from the reset link)
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token') || 'demo-token-123';
-    // setToken(tokenFromUrl);
 
     // Simulate token validation
     const validateToken = async () => {

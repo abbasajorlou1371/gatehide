@@ -52,16 +52,14 @@ export default function ForgotPasswordPage() {
         }
       }
 
-      const data = await response.json();
+      await response.json();
       setEmail(email); // Store email for success message
       setIsEmailSent(true);
-      console.log('Password reset email sent:', data);
       
     } catch (error) {
       // Capture the error message to display to the user
       const errorMessage = error instanceof Error ? error.message : 'خطا در ارسال ایمیل';
       setErrors({ email: errorMessage });
-      console.error('Forgot password error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -85,13 +83,11 @@ export default function ForgotPasswordPage() {
         throw new Error('خطا در ارسال مجدد ایمیل');
       }
 
-      const data = await response.json();
-      console.log('Password reset email resent:', data);
+      await response.json();
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطا در ارسال مجدد ایمیل';
       setErrors({ email: errorMessage });
-      console.error('Resend email error:', error);
     } finally {
       setIsLoading(false);
     }

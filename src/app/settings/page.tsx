@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card, Button, Input, Badge } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import ProtectedRoute from '../../components/ProtectedRoute';
 
 interface UserProfile {
   firstName: string;
@@ -30,7 +31,7 @@ interface PrivacySettings {
   analyticsTracking: boolean;
 }
 
-export default function SettingsPage() {
+function SettingsPageContent() {
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'appearance' | 'security'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -473,5 +474,13 @@ export default function SettingsPage() {
         </div>
       </div>
     </ContentArea>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <ProtectedRoute>
+      <SettingsPageContent />
+    </ProtectedRoute>
   );
 }

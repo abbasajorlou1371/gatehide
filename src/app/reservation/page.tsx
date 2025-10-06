@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import { Table, TableColumn, TableAction, Button, Badge, Modal } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 import Swal from 'sweetalert2';
-
 // Device interface
 interface Device extends Record<string, unknown> {
   id: string;
@@ -24,7 +24,6 @@ interface Device extends Record<string, unknown> {
     os: string;
   };
 }
-
 // Reserved user interface
 interface ReservedUser {
   id: string;
@@ -145,7 +144,6 @@ const mockDevices: Device[] = [
     }
   }
 ];
-
 // Mock reserved users data
 const mockReservedUsers: ReservedUser[] = [
   {
@@ -171,7 +169,7 @@ const mockReservedUsers: ReservedUser[] = [
   }
 ];
 
-export default function DevicesPage() {
+function DevicesPageContent() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
@@ -182,12 +180,10 @@ export default function DevicesPage() {
   const [isReservedUsersModalOpen, setIsReservedUsersModalOpen] = useState(false);
   const [isSystemDetailsModalOpen, setIsSystemDetailsModalOpen] = useState(false);
   const [reservedUsers, setReservedUsers] = useState<ReservedUser[]>([]);
-
   // Filter devices to show only free and online devices
   const availableDevices = devices.filter(device => 
     device.isFree && device.status === 'online'
   );
-
   // Filter devices based on search term
   const filteredDevices = availableDevices.filter(device => {
     if (!searchTerm) return true;
@@ -198,7 +194,6 @@ export default function DevicesPage() {
       (device.location && device.location.toLowerCase().includes(searchLower))
     );
   });
-
   // Debounced search effect
   useEffect(() => {
     if (searchTerm) {
@@ -209,10 +204,7 @@ export default function DevicesPage() {
       return () => clearTimeout(timer);
     } else {
       setIsSearching(false);
-    }
   }, [searchTerm]);
-
-  useEffect(() => {
     // Simulate API call
     const fetchDevices = async () => {
       setLoading(true);
@@ -226,29 +218,18 @@ export default function DevicesPage() {
         setLoading(false);
       }
     };
-
     fetchDevices();
   }, []);
-
   const handleReservation = (device: Device) => {
     setSelectedDevice(device);
     setIsReservationModalOpen(true);
-  };
-
   const handleViewReservedUsers = (device: Device) => {
-    setSelectedDevice(device);
     setReservedUsers(mockReservedUsers); // In real app, fetch from API
     setIsReservedUsersModalOpen(true);
-  };
-
   const handleViewSystemDetails = (device: Device) => {
-    setSelectedDevice(device);
     setIsSystemDetailsModalOpen(true);
-  };
-
   const confirmReservation = async () => {
     if (!selectedDevice) return;
-
     setReservationLoading(true);
     try {
       // Simulate API call for reservation
@@ -262,10 +243,8 @@ export default function DevicesPage() {
             : device
         )
       );
-
       setIsReservationModalOpen(false);
       setSelectedDevice(null);
-      
       // Show success toast
       await Swal.fire({
         title: 'رزرو موفق! 🎉',
@@ -286,60 +265,32 @@ export default function DevicesPage() {
       });
     } catch (error) {
       console.error('Error reserving device:', error);
-      
       // Show error toast
-      await Swal.fire({
         title: 'خطا در رزرو! ❌',
         text: 'خطا در رزرو دستگاه. لطفاً دوباره تلاش کنید.',
         icon: 'error',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
         timer: 4000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
     } finally {
       setReservationLoading(false);
-    }
-  };
-
   const getStatusBadge = (status: Device['status']) => {
     const statusConfig = {
       online: { label: 'آنلاین', variant: 'success' as const, icon: '🟢' },
       offline: { label: 'آفلاین', variant: 'danger' as const, icon: '🔴' },
       reserved: { label: 'رزرو شده', variant: 'warning' as const, icon: '🟡' }
-    };
-
     const config = statusConfig[status];
-    return (
       <Badge variant={config.variant} className="flex items-center gap-1">
         <span>{config.icon}</span>
         {config.label}
       </Badge>
-    );
-  };
-
   const getAvailabilityBadge = (isFree: boolean) => {
     return isFree ? (
       <Badge variant="success" className="flex items-center gap-1">
         <span>✅</span>
         آزاد
-      </Badge>
     ) : (
       <Badge variant="danger" className="flex items-center gap-1">
         <span>❌</span>
         اشغال
-      </Badge>
-    );
-  };
-
   // Table columns configuration
   const columns: TableColumn<Device>[] = [
     {
@@ -355,23 +306,14 @@ export default function DevicesPage() {
         </div>
       )
     },
-    {
       key: 'status',
       label: 'وضعیت',
-      sortable: true,
       render: (value) => getStatusBadge(value as Device['status'])
-    },
-    {
       key: 'isFree',
       label: 'دسترسی',
-      sortable: true,
       render: (value) => getAvailabilityBadge(Boolean(value))
-    },
-    {
       key: 'reservationCount',
       label: 'تعداد رزرو',
-      sortable: true,
-      render: (value, device) => (
         <div className="flex items-center gap-2">
           <span className="text-white font-medium">{String(value)}</span>
           <Button
@@ -382,39 +324,24 @@ export default function DevicesPage() {
           >
             مشاهده
           </Button>
-        </div>
-      )
-    },
-    {
       key: 'hourlyRate',
       label: 'نرخ ساعتی',
-      sortable: true,
       render: (value) => (
         <span className="text-green-400 font-medium">
           {Number(value).toLocaleString('fa-IR')} تومان
         </span>
-      )
-    }
   ];
-
   // Table actions
   const actions: TableAction<Device>[] = [
-    {
       label: 'جزئیات سیستم',
       icon: '💻',
       onClick: handleViewSystemDetails,
       variant: 'secondary',
       className: 'btn-wave'
-    },
-    {
       label: 'رزرو',
       icon: '📅',
       onClick: handleReservation,
       variant: 'primary',
-      className: 'btn-wave'
-    }
-  ];
-
   return (
     <>
       <ContentArea padding="md">
@@ -433,54 +360,27 @@ export default function DevicesPage() {
                 <span className="text-green-400 font-medium">{availableDevices.length}</span> دستگاه آزاد
               </div>
             </div>
-          </div>
-        </div>
-
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-green-500/20 rounded-lg flex-shrink-0">
                 <span className="text-green-400 text-lg sm:text-xl">🟢</span>
-              </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-400 truncate">دستگاه‌های آنلاین</p>
                 <p className="text-lg sm:text-xl font-bold text-white">
                   {devices.filter(d => d.status === 'online').length}
                 </p>
-              </div>
-            </div>
-          </div>
           
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-blue-500/20 rounded-lg flex-shrink-0">
                 <span className="text-blue-400 text-lg sm:text-xl">📅</span>
-              </div>
-              <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-400 truncate">دستگاه‌های آزاد</p>
-                <p className="text-lg sm:text-xl font-bold text-white">
                   {availableDevices.length}
-                </p>
-              </div>
-            </div>
-          </div>
-          
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-yellow-500/20 rounded-lg flex-shrink-0">
                 <span className="text-yellow-400 text-lg sm:text-xl">🟡</span>
-              </div>
-              <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-400 truncate">دستگاه‌های رزرو شده</p>
-                <p className="text-lg sm:text-xl font-bold text-white">
                   {devices.filter(d => !d.isFree).length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Search Bar */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
           <div className="relative">
@@ -497,7 +397,6 @@ export default function DevicesPage() {
               ) : (
                 '🔍'
               )}
-            </div>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
@@ -506,14 +405,9 @@ export default function DevicesPage() {
                 ✕
               </button>
             )}
-          </div>
           {searchTerm && (
             <div className="mt-2 text-xs text-gray-400">
               {filteredDevices.length} نتیجه برای &quot;{searchTerm}&quot;
-            </div>
-          )}
-        </div>
-
         {/* Mobile Card View for Devices */}
         <div className="block sm:hidden">
           {loading ? (
@@ -530,32 +424,24 @@ export default function DevicesPage() {
                   </div>
                 </div>
               ))}
-            </div>
           ) : filteredDevices.length === 0 ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 text-center">
               <div className="text-gray-400 text-sm">
                 {searchTerm ? 'هیچ دستگاهی با این جستجو یافت نشد' : 'هیچ دستگاه آزادی یافت نشد'}
-              </div>
-            </div>
           ) : (
-            <div className="space-y-3">
               {filteredDevices.map((device) => (
                 <div key={device.id} className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
-                  <div className="space-y-3">
                     {/* Device Name and Location */}
                     <div>
                       <h3 className="font-medium text-white text-sm">{device.name}</h3>
                       {device.location && (
                         <p className="text-xs text-gray-400 mt-1">{device.location}</p>
                       )}
-                    </div>
                     
                     {/* Status and Availability */}
                     <div className="flex flex-wrap gap-2">
                       {getStatusBadge(device.status)}
                       {getAvailabilityBadge(device.isFree)}
-                    </div>
-                    
                     {/* Reservation Count and Hourly Rate */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -572,14 +458,10 @@ export default function DevicesPage() {
                           </Button>
                         </div>
                       </div>
-                      <div>
                         <p className="text-xs text-gray-400 mb-1">نرخ ساعتی:</p>
                         <span className="text-green-400 font-medium">
                           {device.hourlyRate.toLocaleString('fa-IR')} تومان
                         </span>
-                      </div>
-                    </div>
-                    
                     {/* Action Buttons */}
                     <div className="pt-2 space-y-2">
                       <Button
@@ -591,23 +473,10 @@ export default function DevicesPage() {
                         <span className="ml-1">💻</span>
                         جزئیات سیستم
                       </Button>
-                      <Button
                         variant="primary"
-                        size="sm"
                         onClick={() => handleReservation(device)}
-                        className="w-full btn-wave min-h-[44px] touch-manipulation"
-                      >
                         <span className="ml-1">📅</span>
                         رزرو دستگاه
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Desktop Table View */}
         <div className="hidden sm:block">
           <Table
@@ -619,10 +488,8 @@ export default function DevicesPage() {
             emptyMessage={searchTerm ? 'هیچ دستگاهی با این جستجو یافت نشد' : 'هیچ دستگاه آزادی یافت نشد'}
             className="min-h-[400px]"
           />
-        </div>
       </div>
     </ContentArea>
-
     {/* Reservation Confirmation Modal */}
     <Modal
         isOpen={isReservationModalOpen}
@@ -636,14 +503,12 @@ export default function DevicesPage() {
           label: reservationLoading ? 'در حال رزرو...' : 'تأیید رزرو',
           onClick: confirmReservation,
           variant: 'primary'
-        }}
         secondaryAction={{
           label: 'انصراف',
           onClick: () => {
             setIsReservationModalOpen(false);
             setSelectedDevice(null);
           }
-        }}
       >
         {selectedDevice && (
           <div className="space-y-4">
@@ -653,25 +518,15 @@ export default function DevicesPage() {
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                   <span className="text-gray-400 text-xs sm:text-sm">نام:</span>
                   <span className="text-white font-medium text-sm sm:text-base">{selectedDevice.name}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                   <span className="text-gray-400 text-xs sm:text-sm">آدرس MAC:</span>
                   <code className="text-gray-300 font-mono text-xs sm:text-sm bg-gray-700/30 px-2 py-1 rounded">
                     {selectedDevice.macAddress}
                   </code>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                   <span className="text-gray-400 text-xs sm:text-sm">مکان:</span>
                   <span className="text-white text-sm sm:text-base">{selectedDevice.location || 'نامشخص'}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                   <span className="text-gray-400 text-xs sm:text-sm">وضعیت:</span>
                   <div className="flex-shrink-0">
                     {getStatusBadge(selectedDevice.status)}
-                  </div>
-                </div>
-              </div>
-            </div>
             
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 sm:p-4">
               <div className="flex items-start gap-2 sm:gap-3">
@@ -681,87 +536,40 @@ export default function DevicesPage() {
                   <p className="text-yellow-300 text-xs sm:text-sm leading-relaxed">
                     با تأیید این رزرو، دستگاه برای شما رزرو خواهد شد و سایر کاربران قادر به استفاده از آن نخواهند بود.
                   </p>
-                </div>
-              </div>
-            </div>
-          </div>
         )}
       </Modal>
-
       {/* Reserved Users Modal */}
       <Modal
         isOpen={isReservedUsersModalOpen}
-        onClose={() => {
           setIsReservedUsersModalOpen(false);
-          setSelectedDevice(null);
-        }}
         title="لیست کاربران رزرو شده"
         size="lg"
-        primaryAction={{
           label: 'بستن',
-          onClick: () => {
             setIsReservedUsersModalOpen(false);
-            setSelectedDevice(null);
           },
-          variant: 'primary'
-        }}
-      >
-        {selectedDevice && (
-          <div className="space-y-4">
             <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
               <h3 className="text-lg font-semibold text-white mb-2">دستگاه: {selectedDevice.name}</h3>
               <p className="text-gray-400 text-sm">تعداد کل رزروها: {selectedDevice.reservationCount}</p>
-            </div>
-            
-            <div className="space-y-3">
               {reservedUsers.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">هیچ کاربر رزرو شده‌ای یافت نشد</p>
-                </div>
-              ) : (
                 reservedUsers.map((user) => (
                   <div key={user.id} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                       <div className="flex-1">
                         <h4 className="text-white font-medium">{user.name}</h4>
                         <p className="text-gray-400 text-sm">{user.email}</p>
-                      </div>
                       <div className="flex flex-col sm:items-end gap-1">
                         <span className="text-green-400 text-sm font-medium">{user.duration}</span>
                         <span className="text-gray-400 text-xs">
                           {new Date(user.reservationTime).toLocaleString('fa-IR')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 ))
-              )}
-            </div>
-          </div>
-        )}
-      </Modal>
-
       {/* System Details Modal */}
-      <Modal
         isOpen={isSystemDetailsModalOpen}
-        onClose={() => {
           setIsSystemDetailsModalOpen(false);
-          setSelectedDevice(null);
-        }}
         title="جزئیات سیستم"
         size="md"
-        primaryAction={{
-          label: 'بستن',
-          onClick: () => {
             setIsSystemDetailsModalOpen(false);
-            setSelectedDevice(null);
-          },
-          variant: 'primary'
-        }}
-      >
-        {selectedDevice && (
-          <div className="space-y-4">
-            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
               <h3 className="text-lg font-semibold text-white mb-3">دستگاه: {selectedDevice.name}</h3>
               <p className="text-gray-400 text-sm mb-4">{selectedDevice.location}</p>
               
@@ -770,35 +578,18 @@ export default function DevicesPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">پردازنده:</span>
                     <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.cpu}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">حافظه RAM:</span>
                     <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.ram}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">کارت گرافیک:</span>
                     <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.gpu}</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">حافظه ذخیره‌سازی:</span>
                     <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.storage}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">سیستم عامل:</span>
                     <span className="text-white font-medium text-sm">{selectedDevice.systemInfo.os}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">نرخ ساعتی:</span>
                     <span className="text-green-400 font-medium text-sm">
                       {selectedDevice.hourlyRate.toLocaleString('fa-IR')} تومان
                     </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <span className="text-blue-400 text-lg flex-shrink-0">ℹ️</span>
@@ -814,5 +605,13 @@ export default function DevicesPage() {
         )}
       </Modal>
     </>
+  );
+}
+
+export default function DevicesPage() {
+  return (
+    <ProtectedRoute>
+      <DevicesPageContent />
+    </ProtectedRoute>
   );
 }

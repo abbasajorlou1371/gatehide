@@ -4,20 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '../hooks/useAuth';
+import UserProfile from './UserProfile';
 
 interface HeaderProps {
   onMenuToggle: () => void;
   isMenuOpen: boolean;
 }
-
-// Mock user data (replace with real user data from context/auth)
-const user = {
-  name: 'علی رضایی',
-  image: 'https://i.pravatar.cc/40?img=3'
-};
-
-// Mock authentication state (replace with real auth context)
-const isAuthenticated = false; // Set to true to show user dropdown, false to show login button
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
   useEffect(() => {
@@ -37,8 +30,11 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
 function UserDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, userType, logout } = useAuth();
 
   useClickOutside(dropdownRef, () => setOpen(false));
+
+  if (!user) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -48,13 +44,19 @@ function UserDropdown() {
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <Image
-          src={user.image}
-          alt={user.name}
-          width={32}
-          height={32}
-          className="w-8 h-8 rounded-full border border-gray-500"
-        />
+        {user.image ? (
+          <Image
+            src={user.image}
+            alt={user.name}
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full border border-gray-500"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium border border-gray-500">
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+        )}
         <span className="font-medium text-white text-sm">{user.name}</span>
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -68,14 +70,17 @@ function UserDropdown() {
       </button>
       {open && (
         <div className="absolute left-0 mt-2 w-44 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50 py-2 animate-fade-in">
+          <div className="px-4 py-2 border-b border-gray-700">
+            <div className="text-sm font-medium text-white">{user.name}</div>
+          </div>
           <button
             className="w-full text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
             onClick={() => {
               setOpen(false);
-              // TODO: Implement change password navigation
+              // TODO: Navigate to settings
             }}
           >
-            تغییر رمز عبور
+            تنظیمات
           </button>
           <Link
             href="/wallet"
@@ -85,10 +90,16 @@ function UserDropdown() {
             کیف پول
           </Link>
           <button
-            className="w-full text-right px-4 py-2 text-sm text-white transition-colors"
-            onClick={() => {
+            className="w-full text-right px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition-colors"
+            onClick={async () => {
               setOpen(false);
-              // TODO: Implement logout logic
+              // Handle logout directly without confirmation
+              try {
+                await logout();
+              } catch (error) {
+                console.error('Logout failed:', error);
+                alert('خطا در خروج از سیستم. لطفاً دوباره تلاش کنید.');
+              }
             }}
           >
             خروج
@@ -100,6 +111,8 @@ function UserDropdown() {
 }
 
 export default function Header({ onMenuToggle }: HeaderProps) {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <header className="gx-glass shadow-md border-b border-gray-600 z-50 flex-shrink-0 w-full">
       <div className="px-4 sm:px-6 lg:px-8">
@@ -133,7 +146,9 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
           {/* User Menu / Login Button */}
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+            ) : isAuthenticated ? (
               <UserDropdown />
             ) : (
               <Link href="/login">
