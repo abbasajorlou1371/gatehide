@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button, Input, Card } from '../../components/ui';
 import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
+import { getAuthEndpoint } from '../../config/api';
 
 interface FormErrors {
   email?: string;
@@ -35,8 +36,8 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      // Simulate API call to forgot password endpoint
-      const response = await fetch('/api/auth/forgot-password', {
+      // API call to forgot password endpoint
+      const response = await fetch(getAuthEndpoint('FORGOT_PASSWORD'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,8 +71,8 @@ export default function ForgotPasswordPage() {
     setErrors({});
     
     try {
-      // Simulate API call to resend endpoint
-      const response = await fetch('/api/auth/resend-password-reset', {
+      // API call to resend endpoint
+      const response = await fetch(getAuthEndpoint('FORGOT_PASSWORD'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,20 +174,6 @@ export default function ForgotPasswordPage() {
                 >
                   تغییر ایمیل
                 </Button>
-              </div>
-
-              <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-lg">⚠️</span>
-                  <div className="text-yellow-300 text-xs">
-                    <p className="font-medium mb-1">نکات مهم:</p>
-                    <ul className="space-y-1 text-right">
-                      <li>• لینک فقط 15 دقیقه معتبر است</li>
-                      <li>• اگر ایمیل را دریافت نکردید، پوشه اسپم را بررسی کنید</li>
-                      <li>• برای امنیت بیشتر، لینک فقط یک بار قابل استفاده است</li>
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
           </Card>

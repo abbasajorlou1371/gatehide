@@ -25,13 +25,6 @@ export default function AuthLayout({
 
         {/* Content */}
         {children}
-
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">
-            © 2024 GateHide. تمامی حقوق محفوظ است.
-          </p>
-        </div>
       </div>
     </div>
   );
