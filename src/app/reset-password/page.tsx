@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Input, Card } from '../../components/ui';
-import ContentArea from '../../components/ContentArea';
+import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 
@@ -192,27 +192,28 @@ export default function ResetPasswordPage() {
   // Loading state while checking token
   if (isTokenValid === null) {
     return (
-      <ContentArea className="min-h-screen flex items-center justify-center py-8">
+      <AuthLayout 
+        title="در حال بررسی..." 
+        subtitle="لطفاً صبر کنید"
+        icon="⏳"
+      >
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
           <p className="text-gray-400">در حال بررسی لینک...</p>
         </div>
-      </ContentArea>
+      </AuthLayout>
     );
   }
 
   // Invalid token
   if (isTokenValid === false) {
     return (
-      <ContentArea className="min-h-screen flex items-center justify-center py-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-4">❌</div>
-            <h1 className="text-3xl font-bold text-red-400 mb-2">لینک نامعتبر</h1>
-            <p className="text-gray-400">لینک بازنشانی رمز عبور نامعتبر یا منقضی شده است</p>
-          </div>
-
-          <Card>
+      <AuthLayout 
+        title="لینک نامعتبر" 
+        subtitle="لینک بازنشانی رمز عبور نامعتبر یا منقضی شده است"
+        icon="❌"
+      >
+        <Card>
             <div className="text-center space-y-4">
               <p className="text-gray-300 text-sm">
                 لینک بازنشانی رمز عبور ممکن است:
@@ -236,24 +237,19 @@ export default function ResetPasswordPage() {
                 </Link>
               </div>
             </div>
-          </Card>
-        </div>
-      </ContentArea>
+        </Card>
+      </AuthLayout>
     );
   }
 
   // Valid token - show reset form
   return (
-    <ContentArea className="min-h-screen flex items-center justify-center py-8">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🔐</div>
-          <h1 className="text-3xl font-bold gx-gradient-text mb-2">بازنشانی رمز عبور</h1>
-          <p className="text-gray-400">رمز عبور جدید خود را وارد کنید</p>
-        </div>
-
-        <Card>
+    <AuthLayout 
+      title="بازنشانی رمز عبور" 
+      subtitle="رمز عبور جدید خود را وارد کنید"
+      icon="🔐"
+    >
+      <Card>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Input
@@ -345,18 +341,17 @@ export default function ResetPasswordPage() {
               <p>• پس از تغییر، به صفحه ورود هدایت می‌شوید</p>
             </div>
           </div>
-        </Card>
+      </Card>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">
-            رمز عبور خود را به خاطر آوردید؟{' '}
-            <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">
-              بازگشت به ورود
-            </Link>
-          </p>
-        </div>
+      {/* Footer */}
+      <div className="text-center mt-8">
+        <p className="text-gray-500 text-sm">
+          رمز عبور خود را به خاطر آوردید؟{' '}
+          <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">
+            بازگشت به ورود
+          </Link>
+        </p>
       </div>
-    </ContentArea>
+    </AuthLayout>
   );
 }

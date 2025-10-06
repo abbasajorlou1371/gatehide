@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import ContentArea from './ContentArea';
@@ -13,6 +14,17 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Check if current path is an authentication page
+  const isAuthPage = pathname === '/login' || 
+                    pathname === '/forgot-password' || 
+                    pathname === '/reset-password';
+
+  // If it's an auth page, render children directly without Layout
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

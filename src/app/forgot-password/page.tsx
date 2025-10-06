@@ -2,105 +2,66 @@
 
 import { useState } from 'react';
 import { Button, Input, Card } from '../../components/ui';
-import ContentArea from '../../components/ContentArea';
+import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
-import Swal from 'sweetalert2';
+
+interface FormErrors {
+  email?: string;
+}
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [email, setEmail] = useState(''); // Keep for display in success message
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (!email) {
-      await Swal.fire({
-        title: 'خطا! ⚠️',
-        text: 'لطفاً ایمیل خود را وارد کنید',
-        icon: 'warning',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      await Swal.fire({
-        title: 'خطا! ⚠️',
-        text: 'لطفاً یک ایمیل معتبر وارد کنید',
-        icon: 'warning',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
-      return;
-    }
-
     setIsLoading(true);
-    
+    setErrors({}); // Clear previous errors when a new request starts
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const formData = new FormData(e.currentTarget);
+      const email = formData.get('email') as string;
+
+      // Basic validation
+      if (!email) {
+        setErrors({ email: 'ایمیل الزامی است' });
+        return;
+      }
+
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        setErrors({ email: 'فرمت ایمیل صحیح نیست' });
+        return;
+      }
+
+      // Simulate API call to forgot password endpoint
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('ایمیل یافت نشد');
+        } else {
+          throw new Error('خطا در ارسال ایمیل. لطفاً دوباره تلاش کنید');
+        }
+      }
+
+      const data = await response.json();
+      setEmail(email); // Store email for success message
       setIsEmailSent(true);
+      console.log('Password reset email sent:', data);
       
-      await Swal.fire({
-        title: 'ایمیل ارسال شد! 📧',
-        text: 'لینک بازنشانی رمز عبور به ایمیل شما ارسال شد',
-        icon: 'success',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
-    } catch {
-      await Swal.fire({
-        title: 'خطا در ارسال! ❌',
-        text: 'خطا در ارسال ایمیل. لطفاً دوباره تلاش کنید',
-        icon: 'error',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
+    } catch (error) {
+      // Capture the error message to display to the user
+      const errorMessage = error instanceof Error ? error.message : 'خطا در ارسال ایمیل';
+      setErrors({ email: errorMessage });
+      console.error('Forgot password error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -108,62 +69,41 @@ export default function ForgotPasswordPage() {
 
   const handleResendEmail = async () => {
     setIsLoading(true);
+    setErrors({});
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate API call to resend endpoint
+      const response = await fetch('/api/auth/resend-password-reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('خطا در ارسال مجدد ایمیل');
+      }
+
+      const data = await response.json();
+      console.log('Password reset email resent:', data);
       
-      await Swal.fire({
-        title: 'ایمیل مجدد ارسال شد! 📧',
-        text: 'لینک جدید به ایمیل شما ارسال شد',
-        icon: 'success',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
-    } catch {
-      await Swal.fire({
-        title: 'خطا در ارسال! ❌',
-        text: 'خطا در ارسال مجدد ایمیل',
-        icon: 'error',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        background: '#1f2937',
-        color: '#ffffff',
-        customClass: {
-          popup: 'swal2-popup-dark',
-          title: 'swal2-title-dark',
-          htmlContainer: 'swal2-content-dark'
-        }
-      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'خطا در ارسال مجدد ایمیل';
+      setErrors({ email: errorMessage });
+      console.error('Resend email error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <ContentArea className="min-h-screen flex items-center justify-center py-8">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🔑</div>
-          <h1 className="text-3xl font-bold gx-gradient-text mb-2">فراموشی رمز عبور</h1>
-          <p className="text-gray-400">بازنشانی رمز عبور خود</p>
-        </div>
-
-        {!isEmailSent ? (
+    <AuthLayout 
+      title="فراموشی رمز عبور" 
+      subtitle="بازنشانی رمز عبور خود"
+      icon="🔑"
+    >
+      {!isEmailSent ? (
           <Card>
             <div className="text-center mb-6">
               <p className="text-gray-300 text-sm leading-relaxed">
@@ -177,11 +117,10 @@ export default function ForgotPasswordPage() {
                   label="ایمیل"
                   name="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="ایمیل خود را وارد کنید"
-                  required
+                  error={errors.email}
                   fullWidth
+                  required
                 />
               </div>
 
@@ -196,16 +135,6 @@ export default function ForgotPasswordPage() {
                 {isLoading ? 'در حال ارسال...' : 'ارسال لینک بازنشانی'}
               </Button>
             </form>
-
-            {/* Demo Info */}
-            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <h4 className="text-blue-400 font-medium mb-2 text-sm">💡 اطلاعات تست:</h4>
-              <div className="text-blue-300 text-xs space-y-1">
-                <p>• هر ایمیل معتبری را وارد کنید</p>
-                <p>• پس از ارسال، به صفحه تأیید هدایت می‌شوید</p>
-                <p>• لینک بازنشانی در ایمیل ارسال می‌شود</p>
-              </div>
-            </div>
           </Card>
         ) : (
           <Card>
@@ -268,21 +197,14 @@ export default function ForgotPasswordPage() {
         )}
 
         {/* Footer */}
-        <div className="text-center mt-8 space-y-2">
+        <div className="text-center mt-8">
           <p className="text-gray-500 text-sm">
             رمز عبور خود را به خاطر آوردید؟{' '}
             <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">
               بازگشت به ورود
             </Link>
           </p>
-          <p className="text-gray-500 text-sm">
-            حساب کاربری ندارید؟{' '}
-            <button className="text-purple-400 hover:text-purple-300 transition-colors">
-              ثبت نام کنید
-            </button>
-          </p>
         </div>
-      </div>
-    </ContentArea>
+    </AuthLayout>
   );
 }
