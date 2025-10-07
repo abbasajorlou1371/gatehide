@@ -254,6 +254,52 @@ class ApiClient {
     });
   }
 
+  async updateProfile(token: string, profileData: { name: string; mobile: string; image?: string }) {
+    return this.makeRequest<ApiResponse<User>>('/profile', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  async sendEmailVerification(token: string, newEmail: string) {
+    return this.makeRequest<{ message: string; code: string }>('/send-email-verification', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ new_email: newEmail }),
+    });
+  }
+
+  async verifyEmailCode(token: string, newEmail: string, code: string) {
+    return this.makeRequest<{ message: string; user: User }>('/verify-email-code', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ new_email: newEmail, code }),
+    });
+  }
+
+  async uploadProfileImage(token: string, imageFile: File) {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    return this.makeRequest<ApiResponse<{ user: User; image_url: string }>>('/profile/upload-image', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+  }
+
   async logout(token: string) {
     return this.makeRequest<ApiResponse<Record<string, never>>>('/auth/logout', {
       method: 'POST',

@@ -72,15 +72,13 @@ function UserDropdown() {
           <div className="px-4 py-2 border-b border-gray-700">
             <div className="text-sm font-medium text-white">{user.name}</div>
           </div>
-          <button
-            className="w-full text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
-            onClick={() => {
-              setOpen(false);
-              // TODO: Navigate to settings
-            }}
+          <Link
+            href="/settings"
+            className="w-full block text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+            onClick={() => setOpen(false)}
           >
             تنظیمات
-          </button>
+          </Link>
           <Link
             href="/wallet"
             className="w-full block text-right px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
