@@ -8,6 +8,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { apiClient, ApiResponse } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
 import { toJalaliDisplay } from '../../utils/jalali';
+import Swal from 'sweetalert2';
 
 interface Gamenet extends Record<string, unknown> {
   id: string;
@@ -35,8 +36,6 @@ function GamenetsPageContent() {
   const { token } = useAuth();
   const [gamenets, setGamenets] = useState<Gamenet[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [gamenetToDelete, setGamenetToDelete] = useState<Gamenet | null>(null);
   const [editingGamenet, setEditingGamenet] = useState<Gamenet | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -365,32 +364,79 @@ function GamenetsPageContent() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteGamenet = (gamenet: Gamenet) => {
-    setGamenetToDelete(gamenet);
-    setIsDeleteModalOpen(true);
-  };
+  const handleDeleteGamenet = async (gamenet: Gamenet) => {
+    const result = await Swal.fire({
+      title: 'تأیید حذف گیم نت',
+      html: `
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/20 mb-4">
+            <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">
+            آیا از حذف این گیم نت اطمینان دارید؟
+          </h3>
+          <div class="text-gray-300 text-sm">
+            <p class="font-medium">${gamenet.name}</p>
+            <p class="text-gray-400">مالک: ${gamenet.owner_name}</p>
+          </div>
+          <p class="text-red-400 text-sm mt-2">این عمل قابل بازگشت نیست.</p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'حذف',
+      cancelButtonText: 'انصراف',
+      reverseButtons: true,
+      theme: 'dark',
+      customClass: {
+        popup: 'font-sans',
+        title: 'text-right',
+        htmlContainer: 'text-right'
+      }
+    });
 
-  const confirmDelete = async () => {
-    if (gamenetToDelete) {
+    if (result.isConfirmed) {
       try {
         setIsLoading(true);
         setError(null);
-        await deleteGamenet(gamenetToDelete.id);
+        await deleteGamenet(gamenet.id);
         await refreshGamenets(); // Refresh the list
-        setGamenetToDelete(null);
-        setIsDeleteModalOpen(false);
+        
+        // Show success message
+        Swal.fire({
+          title: 'موفق!',
+          text: 'گیم نت با موفقیت حذف شد',
+          icon: 'success',
+          confirmButtonText: 'باشه',
+          theme: 'dark',
+          customClass: {
+            popup: 'font-sans',
+            title: 'text-right'
+          }
+        });
       } catch (err) {
         console.error('Error deleting gamenet:', err);
-        setError('خطا در حذف گیم نت');
+        
+        // Show error message
+        Swal.fire({
+          title: 'خطا!',
+          text: 'خطا در حذف گیم نت. لطفاً دوباره تلاش کنید.',
+          icon: 'error',
+          confirmButtonText: 'باشه',
+          theme: 'dark',
+          customClass: {
+            popup: 'font-sans',
+            title: 'text-right'
+          }
+        });
       } finally {
         setIsLoading(false);
       }
     }
-  };
-
-  const cancelDelete = () => {
-    setGamenetToDelete(null);
-    setIsDeleteModalOpen(false);
   };
 
 
@@ -692,42 +738,6 @@ function GamenetsPageContent() {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={cancelDelete}
-        title="تأیید حذف گیم نت"
-        size="md"
-        primaryAction={{
-          label: "حذف",
-          onClick: confirmDelete,
-          variant: "danger"
-        }}
-        secondaryAction={{
-          label: "انصراف",
-          onClick: cancelDelete
-        }}
-      >
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/20 mb-4">
-            <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-white mb-2">
-            آیا از حذف این گیم نت اطمینان دارید؟
-          </h3>
-          {gamenetToDelete && (
-            <div className="text-gray-300 text-sm">
-              <p className="font-medium">{gamenetToDelete.name}</p>
-              <p className="text-gray-400">مالک: {gamenetToDelete.owner_name}</p>
-            </div>
-          )}
-          <p className="text-gray-400 text-sm mt-4">
-            این عمل قابل بازگشت نیست.
-          </p>
-        </div>
-      </Modal>
 
     </ContentArea>
   );

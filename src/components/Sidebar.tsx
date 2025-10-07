@@ -132,7 +132,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
     { name: 'گیم نت‌ها', href: '/gamenets', icon: '🎮' },
     { name: 'رزرو دستگاه‌ها', href: '/reservation', icon: '💻' },
     { name: 'کاربران', href: '/users', icon: '👥' },
-    { name: 'پلن‌های اشتراک', href: '/subscriptions', icon: '📋' },
+    { name: 'پلن‌های اشتراک', href: '/subscription-plans', icon: '📋' },
     { name: 'آمار و تحلیل‌ها', href: '/analytics', icon: '📈' },
     { 
       name: 'امور مالی', 

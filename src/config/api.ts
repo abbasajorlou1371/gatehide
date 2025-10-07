@@ -18,6 +18,13 @@ export const API_CONFIG = {
       LIST: '/api/v1/notifications',
       GET: '/api/v1/notifications',
     },
+    SUBSCRIPTION_PLANS: {
+      LIST: '/api/v1/subscription-plans',
+      CREATE: '/api/v1/subscription-plans',
+      GET: '/api/v1/subscription-plans',
+      UPDATE: '/api/v1/subscription-plans',
+      DELETE: '/api/v1/subscription-plans',
+    },
     HEALTH: '/api/v1/health',
   },
 } as const;
@@ -35,4 +42,9 @@ export const getAuthEndpoint = (endpoint: keyof typeof API_CONFIG.ENDPOINTS.AUTH
 // Helper function to get notification endpoints
 export const getNotificationEndpoint = (endpoint: keyof typeof API_CONFIG.ENDPOINTS.NOTIFICATIONS): string => {
   return buildApiUrl(API_CONFIG.ENDPOINTS.NOTIFICATIONS[endpoint]);
+};
+
+// Helper function to get subscription plan endpoints
+export const getSubscriptionPlanEndpoint = (endpoint: keyof typeof API_CONFIG.ENDPOINTS.SUBSCRIPTION_PLANS): string => {
+  return buildApiUrl(API_CONFIG.ENDPOINTS.SUBSCRIPTION_PLANS[endpoint]);
 };
