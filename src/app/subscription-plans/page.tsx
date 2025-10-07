@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Button, Badge, Table, TableColumn, TableAction, Pagination } from '../../components/ui';
 import Modal from '../../components/ui/Modal';
@@ -12,7 +12,6 @@ import { formatNumberWithCommas, parseFormattedNumber } from '../../utils/number
 
 
 // Remove duplicate interface - using the one from service
-
 function SubscriptionsPageContent() {
   const { token } = useAuth();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -22,6 +21,7 @@ function SubscriptionsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
+  const isFetchingRef = useRef(false); // Request deduplication using ref
 
   // Form state
   const [formData, setFormData] = useState({
@@ -40,8 +40,9 @@ function SubscriptionsPageContent() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const fetchPlans = useCallback(async () => {
-    if (!token || isLoading) return; // Prevent multiple simultaneous requests
+    if (!token || isFetchingRef.current) return; // Prevent duplicate requests
     
+    isFetchingRef.current = true;
     setIsLoading(true);
     try {
       const response = await SubscriptionPlanService.getAllPlans(token, {
@@ -55,19 +56,16 @@ function SubscriptionsPageContent() {
       // You might want to show a toast notification here
     } finally {
       setIsLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [token, isLoading, itemsPerPage, currentPage]);
+  }, [token, itemsPerPage, currentPage]);
 
   useEffect(() => {
     if (token) {
-      // Add a small delay to prevent multiple rapid requests
-      const timeoutId = setTimeout(() => {
-        fetchPlans();
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
+      fetchPlans();
     }
-  }, [token, currentPage, fetchPlans]); // Add fetchPlans dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, currentPage]); // Intentionally excluding fetchPlans to prevent infinite loops
 
   // Table columns configuration
   const columns: TableColumn<SubscriptionPlan>[] = [
@@ -219,7 +217,7 @@ function SubscriptionsPageContent() {
       setIsLoading(true);
       try {
         await SubscriptionPlanService.deletePlan(token, plan.id);
-        await fetchPlans(); // Refresh the list
+        // Plans will be refreshed automatically by useEffect
         
         // Show success message
         Swal.fire({
@@ -374,8 +372,7 @@ function SubscriptionsPageContent() {
         await SubscriptionPlanService.createPlan(token, createData);
       }
       
-      // Refresh the plans list
-      await fetchPlans();
+      // Plans will be refreshed automatically by useEffect
       setIsModalOpen(false);
     } catch (error) {
       console.error('Failed to save plan:', error);
