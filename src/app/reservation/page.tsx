@@ -235,12 +235,14 @@ function DevicesPageContent() {
     setIsReservationModalOpen(true);
   };
 
-  const handleViewReservedUsers = (device: Device) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleViewReservedUsers = (_device: Device) => {
     setReservedUsers(mockReservedUsers); // In real app, fetch from API
     setIsReservedUsersModalOpen(true);
   };
 
-  const handleViewSystemDetails = (device: Device) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleViewSystemDetails = (_device: Device) => {
     setIsSystemDetailsModalOpen(true);
   };
 

@@ -50,8 +50,6 @@ function GamenetsPageContent() {
   // Search and pagination state
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
-  const [hasPrev, setHasPrev] = useState(false);
   
   // Track last token that was used for fetching
   const lastFetchedTokenRef = useRef<string | null>(null);
@@ -134,15 +132,11 @@ function GamenetsPageContent() {
         setGamenets(response.data || []);
         setTotalItems(response.pagination.total_items);
         setTotalPages(response.pagination.total_pages);
-        setHasNext(response.pagination.has_next);
-        setHasPrev(response.pagination.has_prev);
       } else {
         // Fallback for non-paginated response
         setGamenets(response.data || []);
         setTotalItems(response.data ? response.data.length : 0);
         setTotalPages(1);
-        setHasNext(false);
-        setHasPrev(false);
       }
     } catch (err) {
       console.error('Error fetching gamenets:', err);
@@ -284,7 +278,7 @@ function GamenetsPageContent() {
       key: 'license_attachment',
       label: 'مجوز',
       sortable: false,
-      render: (value, gamenet) => {
+      render: (value) => {
         if (!value || !String(value).trim()) {
           return (
             <span className="text-gray-500 text-sm">

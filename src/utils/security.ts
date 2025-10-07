@@ -51,7 +51,7 @@ export class SecurityUtils {
     try {
       const storage = persistent ? localStorage : sessionStorage;
       storage.setItem(key, value);
-    } catch (error) {
+    } catch {
       // Fallback to memory storage in case of quota exceeded
       this.setMemoryItem(key, value);
     }
@@ -63,7 +63,7 @@ export class SecurityUtils {
     try {
       // Try sessionStorage first, then localStorage
       return sessionStorage.getItem(key) || localStorage.getItem(key);
-    } catch (error) {
+    } catch {
       return this.getMemoryItem(key);
     }
   }
@@ -133,7 +133,7 @@ export class SecurityUtils {
     
     try {
       return localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -163,7 +163,7 @@ export class SecurityUtils {
     
     try {
       return JSON.parse(userData);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -221,7 +221,7 @@ export class SecurityUtils {
       const currentTime = Math.floor(Date.now() / 1000);
       // Add 30 second buffer
       return payload.exp <= currentTime + 30;
-    } catch (error) {
+    } catch {
       return true;
     }
   }
@@ -234,7 +234,7 @@ export class SecurityUtils {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (!payload.exp) return null;
       return new Date(payload.exp * 1000);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -381,7 +381,7 @@ export class SecurityUtils {
       if (!data) return [];
       
       return JSON.parse(data);
-    } catch (error) {
+    } catch {
       return [];
     }
   }

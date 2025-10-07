@@ -7,7 +7,6 @@ import AuthLayout from '../../components/AuthLayout';
 import { Card } from '../../components/ui';
 
 export default function LogoutPage() {
-  const [isLoggingOut, setIsLoggingOut] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { logout, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -23,9 +22,8 @@ export default function LogoutPage() {
         setTimeout(() => {
           router.push('/login');
         }, 2000);
-      } catch (error) {
+      } catch {
         setError('خطا در خروج از سیستم');
-        setIsLoggingOut(false);
       }
     };
 

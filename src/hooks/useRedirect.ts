@@ -31,7 +31,7 @@ export function useRedirect() {
       }
 
       // Fallback to default redirect based on user type
-      const defaultRedirect = RedirectUtils.getDefaultRedirectForUserType(userType || 'user');
+      const defaultRedirect = RedirectUtils.getDefaultRedirectForUserType();
       router.push(defaultRedirect);
     }
   }, [isAuthenticated, userType, isLoading, pathname, router]);
@@ -41,7 +41,6 @@ export function useRedirect() {
  * Hook for getting redirect URL after login
  */
 export function useLoginRedirect() {
-  const { userType } = useAuth();
   
   const getRedirectUrl = (defaultUrl?: string): string => {
     // Check for intended redirect first
@@ -55,7 +54,7 @@ export function useLoginRedirect() {
       return defaultUrl;
     }
 
-    return RedirectUtils.getDefaultRedirectForUserType(userType || 'user');
+    return RedirectUtils.getDefaultRedirectForUserType();
   };
 
   return { getRedirectUrl };

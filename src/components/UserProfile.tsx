@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useAuth } from '../hooks/useAuth';
 import { Badge } from './ui';
 import LogoutButton from './LogoutButton';
@@ -31,9 +32,11 @@ export default function UserProfile() {
       </div>
       
       {user.image ? (
-        <img
+        <Image
           src={user.image}
           alt={user.name}
+          width={32}
+          height={32}
           className="w-8 h-8 rounded-full object-cover"
         />
       ) : (

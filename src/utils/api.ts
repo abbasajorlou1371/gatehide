@@ -303,7 +303,7 @@ class ApiClient {
           try {
             const response = JSON.parse(xhr.responseText);
             resolve(response);
-          } catch (error) {
+          } catch {
             reject(new Error('خطا در پردازش پاسخ سرور'));
           }
         } else {

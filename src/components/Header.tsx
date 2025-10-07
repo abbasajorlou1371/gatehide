@@ -5,7 +5,6 @@ import { Button } from './ui';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../hooks/useAuth';
-import UserProfile from './UserProfile';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -30,7 +29,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
 function UserDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, userType, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   useClickOutside(dropdownRef, () => setOpen(false));
 

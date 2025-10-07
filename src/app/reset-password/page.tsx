@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Card } from '../../components/ui';
 import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { getAuthEndpoint } from '../../config/api';
 
 interface FormErrors {
@@ -14,7 +14,6 @@ interface FormErrors {
 }
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const email = searchParams.get('email');
@@ -46,7 +45,7 @@ export default function ResetPasswordPage() {
         } else {
           setErrors({ token: 'لینک بازنشانی رمز عبور نامعتبر یا منقضی شده است' });
         }
-      } catch (error) {
+      } catch {
         setErrors({ token: 'خطا در بررسی لینک بازنشانی' });
       } finally {
         setIsValidating(false);
@@ -54,7 +53,7 @@ export default function ResetPasswordPage() {
     };
 
     validateToken();
-  }, [token]);
+  }, [token, email]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

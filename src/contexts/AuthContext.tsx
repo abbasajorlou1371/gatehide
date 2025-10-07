@@ -111,7 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Verify token is still valid by fetching profile
           try {
             const profileResponse = await apiClient.getProfile(token);
-            const rememberMe = SecurityUtils.getRememberMe();
             
             dispatch({
               type: 'LOGIN_SUCCESS',
@@ -244,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (state.token) {
           await apiClient.logout(state.token);
         }
-      } catch (error) {
+      } catch {
         // Silently fail
       } finally {
         SecurityUtils.clearAuth();

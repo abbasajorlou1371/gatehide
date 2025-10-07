@@ -79,7 +79,7 @@ export class RedirectUtils {
   /**
    * Get the appropriate redirect URL based on user type
    */
-  static getDefaultRedirectForUserType(userType: 'user' | 'admin'): string {
+  static getDefaultRedirectForUserType(): string {
     // Always redirect to dashboard (/) regardless of user type
     return '/';
   }

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import ContentArea from "../components/ContentArea";
 import { Card, Badge } from "../components/ui";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { useAuth } from "../hooks/useAuth";
 
 function DashboardContent() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -14,7 +13,6 @@ function DashboardContent() {
     servers: 0,
     onlinePlayers: 0
   });
-  const { user, userType } = useAuth();
 
   // Mock data for gamenet management
   const gamenetData = [
