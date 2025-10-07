@@ -39,66 +39,13 @@ function SubscriptionsPageContent() {
   });
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    const mockPlans: SubscriptionPlan[] = [
-      {
-        id: '1',
-        name: 'پلن پایه',
-        description: 'پلن مناسب برای شروع کار',
-        price: 50000,
-        duration: 1,
-        features: ['دسترسی به 5 گیم نت', 'پشتیبانی ایمیل', 'گزارشات ماهانه'],
-        isActive: true,
-        createdAt: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'پلن حرفه‌ای',
-        description: 'پلن مناسب برای کسب‌وکارهای متوسط',
-        price: 150000,
-        duration: 3,
-        features: ['دسترسی به 15 گیم نت', 'پشتیبانی تلفنی', 'گزارشات هفتگی', 'آنالیز پیشرفته'],
-        isActive: true,
-        createdAt: '2024-02-20'
-      },
-      {
-        id: '3',
-        name: 'پلن سازمانی',
-        description: 'پلن مناسب برای سازمان‌های بزرگ',
-        price: 500000,
-        duration: 12,
-        features: ['دسترسی نامحدود', 'پشتیبانی 24/7', 'گزارشات روزانه', 'API دسترسی', 'مدیریت چند کاربره'],
-        isActive: true,
-        createdAt: '2024-03-10'
-      },
-      {
-        id: '4',
-        name: 'پلن آزمایشی',
-        description: 'پلن رایگان برای تست',
-        price: 0,
-        duration: 1,
-        features: ['دسترسی به 1 گیم نت', 'پشتیبانی محدود'],
-        isActive: false,
-        createdAt: '2024-03-25'
-      },
-      {
-        id: '5',
-        name: 'پلن سالانه',
-        description: 'پلن با تخفیف ویژه برای خرید سالانه',
-        price: 400000,
-        duration: 12,
-        features: ['دسترسی به 20 گیم نت', 'پشتیبانی تلفنی', 'گزارشات ماهانه', 'تخفیف 20%'],
-        isActive: true,
-        createdAt: '2024-04-05'
-      }
-    ];
-
-    // Simulate API call
+    // TODO: Fetch subscription plans from API
     setIsLoading(true);
-    setTimeout(() => {
-      setPlans(mockPlans);
-      setIsLoading(false);
-    }, 1000);
+    
+    // Placeholder for API call
+    // fetchSubscriptionPlans().then(data => setPlans(data)).finally(() => setIsLoading(false));
+    
+    setIsLoading(false);
   }, []);
 
   // Table columns configuration

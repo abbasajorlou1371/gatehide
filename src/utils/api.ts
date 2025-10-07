@@ -1,4 +1,10 @@
 import { User } from '../types/auth';
+import { 
+  SessionsResponse, 
+  LogoutSessionResponse, 
+  LogoutAllOthersResponse, 
+  LogoutAllResponse 
+} from '../types/sessions';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
@@ -250,6 +256,65 @@ class ApiClient {
 
   async logout(token: string) {
     return this.makeRequest<ApiResponse<Record<string, never>>>('/auth/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async changePassword(
+    token: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  ) {
+    return this.makeRequest<ApiResponse<{
+      user_id: number;
+      user_type: string;
+    }>>('/change-password', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      }),
+    });
+  }
+
+  // Session management methods
+  async getActiveSessions(token: string): Promise<SessionsResponse> {
+    return this.makeRequest<SessionsResponse>('/sessions/', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async logoutSession(token: string, sessionId: number): Promise<LogoutSessionResponse> {
+    return this.makeRequest<LogoutSessionResponse>(`/sessions/${sessionId}/logout`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async logoutAllOtherSessions(token: string): Promise<LogoutAllOthersResponse> {
+    return this.makeRequest<LogoutAllOthersResponse>('/sessions/logout-others', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async logoutAllSessions(token: string): Promise<LogoutAllResponse> {
+    return this.makeRequest<LogoutAllResponse>('/sessions/logout-all', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
