@@ -173,12 +173,12 @@ export class SecurityUtils {
   }
 
   // User type management
-  static setUserType(userType: 'user' | 'admin', rememberMe: boolean = false): void {
+  static setUserType(userType: 'user' | 'admin' | 'gamenet', rememberMe: boolean = false): void {
     this.setItem(this.USER_TYPE_KEY, userType, rememberMe);
   }
 
-  static getUserType(): 'user' | 'admin' | null {
-    return this.getItem(this.USER_TYPE_KEY) as 'user' | 'admin' | null;
+  static getUserType(): 'user' | 'admin' | 'gamenet' | null {
+    return this.getItem(this.USER_TYPE_KEY) as 'user' | 'admin' | 'gamenet' | null;
   }
 
   static removeUserType(): void {

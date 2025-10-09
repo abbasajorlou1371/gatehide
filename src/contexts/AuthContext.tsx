@@ -20,7 +20,7 @@ const initialState: AuthState = {
 // Action types
 type AuthAction =
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string; userType: 'user' | 'admin' } }
+  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string; userType: 'user' | 'admin' | 'gamenet' } }
   | { type: 'LOGIN_FAILURE' }
   | { type: 'LOGOUT' }
   | { type: 'REFRESH_TOKEN'; payload: { token: string } }
@@ -305,7 +305,7 @@ export function useAuth(): AuthContextType {
 // Higher-order component for protected routes
 export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  requiredUserType?: 'user' | 'admin'
+  requiredUserType?: 'user' | 'admin' | 'gamenet'
 ) {
   return function AuthenticatedComponent(props: P) {
     const { isAuthenticated, userType, isLoading } = useAuth();
@@ -329,7 +329,13 @@ export function withAuth<P extends object>(
     if (requiredUserType && userType !== requiredUserType) {
       // Redirect to appropriate dashboard based on user type
       if (typeof window !== 'undefined') {
-        window.location.href = userType === 'admin' ? '/admin' : '/';
+        if (userType === 'admin') {
+          window.location.href = '/admin';
+        } else if (userType === 'gamenet') {
+          window.location.href = '/gamenets';
+        } else {
+          window.location.href = '/';
+        }
       }
       return null;
     }

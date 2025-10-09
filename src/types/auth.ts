@@ -16,7 +16,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user_type: 'user' | 'admin';
+  user_type: 'user' | 'admin' | 'gamenet';
   user: User;
   expires_at: string;
 }
@@ -24,7 +24,7 @@ export interface LoginResponse {
 export interface AuthState {
   user: User | null;
   token: string | null;
-  userType: 'user' | 'admin' | null;
+  userType: 'user' | 'admin' | 'gamenet' | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
