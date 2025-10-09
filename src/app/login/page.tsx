@@ -158,7 +158,7 @@ export default function LoginPage() {
     return (
       <AuthLayout 
         title="GateHide" 
-        subtitle="ورود به پنل مدیریت"
+        subtitle="ورود به پنل کاربری"
         icon="🎮"
       >
         <Card>
@@ -181,7 +181,7 @@ export default function LoginPage() {
   return (
     <AuthLayout 
       title="GateHide" 
-      subtitle="ورود به پنل مدیریت"
+      subtitle="ورود به پنل کاربری"
       icon="🎮"
     >
       <Card>

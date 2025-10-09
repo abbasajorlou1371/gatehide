@@ -224,6 +224,26 @@ function GamenetsPageContent() {
     );
   };
 
+  const resendCredentials = async (id: string) => {
+    if (!token) throw new Error('No authentication token');
+    
+    // Direct fetch without retry logic for faster failure feedback
+    const response = await fetch(`http://localhost:8080/api/v1/gamenets/${id}/resend-credentials`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'خطای سرور' }));
+      throw new Error(errorData.error || 'خطا در ارسال اطلاعات');
+    }
+
+    return await response.json();
+  };
+
 
   // Fetch gamenets on mount and when token changes
   useEffect(() => {
@@ -439,6 +459,124 @@ function GamenetsPageContent() {
     }
   };
 
+  const handleResendCredentials = async (gamenet: Gamenet) => {
+    const result = await Swal.fire({
+      title: 'ارسال اطلاعات ورود',
+      html: `
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-500/20 mb-4">
+            <svg class="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">
+            ارسال اطلاعات ورود به پیامک
+          </h3>
+          <div class="text-gray-300 text-sm space-y-1">
+            <p class="font-medium">${gamenet.name}</p>
+            <p class="text-gray-400">مالک: ${gamenet.owner_name}</p>
+            <p class="text-blue-400">📱 ${gamenet.owner_mobile}</p>
+          </div>
+          <p class="text-yellow-400 text-sm mt-3">
+            رمز عبور جدید تولید شده و به موبایل ارسال می‌شود
+          </p>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: '📱 ارسال پیامک',
+      cancelButtonText: 'انصراف',
+      reverseButtons: true,
+      theme: 'dark',
+      customClass: {
+        popup: 'font-sans',
+        title: 'text-right',
+        htmlContainer: 'text-right'
+      }
+    });
+
+    if (result.isConfirmed) {
+      // Show loading state
+      Swal.fire({
+        title: 'در حال ارسال...',
+        html: `
+          <div class="text-center">
+            <div class="mx-auto mb-4">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            </div>
+            <p class="text-gray-300 text-sm">
+              در حال تولید رمز عبور جدید و ارسال پیامک...
+            </p>
+            <p class="text-blue-400 text-xs mt-2">
+              📱 ${gamenet.owner_mobile}
+            </p>
+          </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        theme: 'dark',
+        customClass: {
+          popup: 'font-sans',
+          title: 'text-right',
+          htmlContainer: 'text-right'
+        }
+      });
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        await resendCredentials(gamenet.id);
+        
+        // Show success message
+        Swal.fire({
+          title: 'موفق!',
+          html: `
+            <div class="text-center">
+              <p class="text-green-400 mb-2">✅ اطلاعات ورود با موفقیت ارسال شد</p>
+              <p class="text-gray-300 text-sm">
+                پیامک حاوی اطلاعات ورود به شماره:
+              </p>
+              <p class="text-blue-400 text-sm mt-1 font-medium">
+                ${gamenet.owner_mobile}
+              </p>
+              <p class="text-gray-400 text-xs mt-2">
+                ارسال شد.
+              </p>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonText: 'باشه',
+          theme: 'dark',
+          customClass: {
+            popup: 'font-sans',
+            title: 'text-right',
+            htmlContainer: 'text-right'
+          }
+        });
+      } catch (err) {
+        console.error('Error resending credentials:', err);
+        
+        // Show error message
+        Swal.fire({
+          title: 'خطا!',
+          text: 'خطا در ارسال اطلاعات ورود. لطفاً دوباره تلاش کنید.',
+          icon: 'error',
+          confirmButtonText: 'باشه',
+          theme: 'dark',
+          customClass: {
+            popup: 'font-sans',
+            title: 'text-right'
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -516,6 +654,12 @@ function GamenetsPageContent() {
 
   // Table actions configuration
   const actions: TableAction<Gamenet>[] = [
+    {
+      label: 'ارسال اطلاعات',
+      icon: '📧',
+      onClick: handleResendCredentials,
+      variant: 'primary'
+    },
     {
       label: 'ویرایش',
       icon: '✏️',

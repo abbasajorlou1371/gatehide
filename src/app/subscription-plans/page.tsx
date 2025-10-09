@@ -217,7 +217,8 @@ function SubscriptionsPageContent() {
       setIsLoading(true);
       try {
         await SubscriptionPlanService.deletePlan(token, plan.id);
-        // Plans will be refreshed automatically by useEffect
+        // Refresh the plans list after successful deletion
+        await fetchPlans();
         
         // Show success message
         Swal.fire({
@@ -372,7 +373,8 @@ function SubscriptionsPageContent() {
         await SubscriptionPlanService.createPlan(token, createData);
       }
       
-      // Plans will be refreshed automatically by useEffect
+      // Refresh the plans list after successful operation
+      await fetchPlans();
       setIsModalOpen(false);
     } catch (error) {
       console.error('Failed to save plan:', error);
