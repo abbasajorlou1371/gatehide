@@ -8,6 +8,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { apiClient, ApiResponse } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
 import { toJalaliDisplay } from '../../utils/jalali';
+import { API_CONFIG } from '../../config/api';
 import Swal from 'sweetalert2';
 
 interface Gamenet extends Record<string, unknown> {
@@ -228,7 +229,7 @@ function GamenetsPageContent() {
     if (!token) throw new Error('No authentication token');
     
     // Direct fetch without retry logic for faster failure feedback
-    const response = await fetch(`http://localhost:8080/api/v1/gamenets/${id}/resend-credentials`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/gamenets/${id}/resend-credentials`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
