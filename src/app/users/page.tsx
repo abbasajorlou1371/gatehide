@@ -220,7 +220,7 @@ function UsersPageContent() {
     return await response.json();
   };
 
-  const searchUserByIdentifier = async (identifier: string) => {
+  const searchUserByIdentifier = useCallback(async (identifier: string) => {
     if (!token) throw new Error('No authentication token');
     
     const response = await apiClient.authenticatedRequest<{found: boolean; data?: User; message: string}>(
@@ -230,7 +230,7 @@ function UsersPageContent() {
     );
     
     return response;
-  };
+  }, [token]);
 
   const attachUserToGamenet = async (userId: string) => {
     if (!token) throw new Error('No authentication token');
@@ -568,7 +568,7 @@ function UsersPageContent() {
     }, 500); // 500ms debounce
 
     return () => clearTimeout(searchTimeout);
-  }, [searchIdentifier, searchMode]);
+  }, [searchIdentifier, searchMode, searchUserByIdentifier]);
 
   const handleSelectUserFromSearch = async (user: User) => {
     setShowSearchResults(false);
