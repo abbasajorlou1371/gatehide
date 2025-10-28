@@ -5,6 +5,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { Table, TableColumn, TableAction, Button, Badge, Modal } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 import Swal from 'sweetalert2';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 // Device interface
 interface Device extends Record<string, unknown> {
@@ -183,6 +184,9 @@ function DevicesPageContent() {
   const [isReservedUsersModalOpen, setIsReservedUsersModalOpen] = useState(false);
   const [isSystemDetailsModalOpen, setIsSystemDetailsModalOpen] = useState(false);
   const [reservedUsers, setReservedUsers] = useState<ReservedUser[]>([]);
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.reservation.title, PAGE_TITLES.reservation.description);
 
   // Filter devices to show only free and online devices
   const availableDevices = devices.filter(device => 

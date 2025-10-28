@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ContentArea from "../../components/ContentArea";
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Card, Button, Badge, Input, Modal } from "../../components/ui";
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface Transaction {
   id: number;
@@ -20,6 +21,9 @@ function WalletPageContent() {
   const [chargeAmount, setChargeAmount] = useState('');
   const [showChargeModal, setShowChargeModal] = useState(false);
   const [isCharging, setIsCharging] = useState(false);
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.wallet.title, PAGE_TITLES.wallet.description);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([
     {
       id: 1,

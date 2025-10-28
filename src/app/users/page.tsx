@@ -11,6 +11,7 @@ import { toJalaliDisplay } from '../../utils/jalali';
 import { API_CONFIG } from '../../config/api';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface User extends Record<string, unknown> {
   id: string;
@@ -31,6 +32,9 @@ interface UserFormData {
 
 function UsersPageContent() {
   const { token } = useAuth();
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.users.title, PAGE_TITLES.users.description);
   const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);

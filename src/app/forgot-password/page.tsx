@@ -5,6 +5,7 @@ import { Button, Input, Card } from '../../components/ui';
 import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
 import { getAuthEndpoint } from '../../config/api';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface FormErrors {
   email?: string;
@@ -15,6 +16,9 @@ export default function ForgotPasswordPage() {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [email, setEmail] = useState(''); // Keep for display in success message
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.forgotPassword.title, PAGE_TITLES.forgotPassword.description);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

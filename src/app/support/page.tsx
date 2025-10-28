@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Card, Button, Input, Badge } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 interface ContactForm {
   name: string;
   email: string;
@@ -21,6 +22,9 @@ function SupportPageContent() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.support.title, PAGE_TITLES.support.description);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({

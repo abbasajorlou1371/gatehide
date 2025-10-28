@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 interface Payment extends Record<string, unknown> {
   id: string;
   gamenetName: string;
@@ -22,6 +23,9 @@ function PaymentsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.payments.title, PAGE_TITLES.payments.description);
   useEffect(() => {
     // Mock data - replace with actual API calls
     const mockPayments: Payment[] = [

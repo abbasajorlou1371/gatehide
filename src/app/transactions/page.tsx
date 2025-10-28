@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Badge, Table, TableColumn, Pagination } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface Transaction extends Record<string, unknown> {
   id: string;
@@ -25,6 +26,9 @@ function TransactionsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.transactions.title, PAGE_TITLES.transactions.description);
 
   useEffect(() => {
     // Mock data - replace with actual API calls

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, Card } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -37,6 +38,9 @@ function AnalyticsPageContent() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.analytics.title, PAGE_TITLES.analytics.description);
 
   useEffect(() => {
     // Mock data - replace with actual API calls

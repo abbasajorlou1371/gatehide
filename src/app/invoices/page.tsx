@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { Badge, Table, TableColumn, TableAction, Pagination, Modal, Button } from '../../components/ui';
 import ContentArea from '../../components/ContentArea';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 interface Invoice extends Record<string, unknown> {
   id: string;
   invoiceNumber: string;
@@ -22,6 +23,9 @@ function InvoicesPageContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.invoices.title, PAGE_TITLES.invoices.description);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   // Mock data - replace with actual API calls

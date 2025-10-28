@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Layout from "../components/Layout";
@@ -20,10 +19,7 @@ const vazirmatn = Vazirmatn({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "گیت هید - پلتفرم مدیریت پروژه",
-  description: "پلتفرم مدیریت پروژه و همکاری تیمی برای تیم‌های توسعه نرم‌افزار",
-};
+// Metadata is now handled by individual pages
 
 export default function RootLayout({
   children,

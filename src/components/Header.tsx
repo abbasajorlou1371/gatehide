@@ -39,7 +39,7 @@ function UserDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
         aria-haspopup="true"
         aria-expanded={open}
       >
@@ -49,16 +49,18 @@ function UserDropdown() {
             alt={user.name}
             width={32}
             height={32}
-            className="w-8 h-8 rounded-full border border-gray-500"
+            className="w-8 h-8 rounded-full border border-gray-500 flex-shrink-0"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium border border-gray-500">
-            {user.name.charAt(0).toUpperCase()}
+          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium border border-gray-500 flex-shrink-0">
+            {(user.name || user.email || 'U').charAt(0).toUpperCase()}
           </div>
         )}
-        <span className="font-medium text-white text-sm">{user.name}</span>
+        <span className="font-medium text-white text-sm truncate max-w-32">
+          {user.name || user.email || 'کاربر'}
+        </span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
@@ -70,7 +72,9 @@ function UserDropdown() {
       {open && (
         <div className="absolute left-0 mt-2 w-44 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50 py-2 animate-fade-in">
           <div className="px-4 py-2 border-b border-gray-700">
-            <div className="text-sm font-medium text-white">{user.name}</div>
+            <div className="text-sm font-medium text-white">
+              {user.name || user.email || 'کاربر'}
+            </div>
           </div>
           <Link
             href="/settings"

@@ -5,11 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import AuthLayout from '../../components/AuthLayout';
 import { Card } from '../../components/ui';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 export default function LogoutPage() {
   const [error, setError] = useState<string | null>(null);
   const { logout, isAuthenticated } = useAuth();
   const router = useRouter();
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.logout.title, PAGE_TITLES.logout.description);
 
   useEffect(() => {
     const performLogout = async () => {

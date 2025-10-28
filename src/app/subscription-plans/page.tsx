@@ -8,6 +8,7 @@ import ContentArea from '../../components/ContentArea';
 import { SubscriptionPlanService, SubscriptionPlan, CreatePlanRequest, UpdatePlanRequest } from '../../services/subscriptionPlanService';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 import { formatNumberWithCommas, parseFormattedNumber } from '../../utils/numberFormat';
 
 
@@ -22,6 +23,9 @@ function SubscriptionsPageContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
   const isFetchingRef = useRef(false); // Request deduplication using ref
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.subscriptionPlans.title, PAGE_TITLES.subscriptionPlans.description);
 
   // Form state
   const [formData, setFormData] = useState({

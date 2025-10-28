@@ -9,6 +9,7 @@ import { useLoginRedirect } from '../../hooks/useRedirect';
 import { ApiError } from '../../utils/api';
 import { SecurityUtils } from '../../utils/security';
 import Link from 'next/link';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface FormErrors {
   email?: string;
@@ -27,6 +28,9 @@ export default function LoginPage() {
   const { login, isAuthenticated, userType, isLoading } = useAuth();
   const { getRedirectUrl } = useLoginRedirect();
   const router = useRouter();
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.login.title, PAGE_TITLES.login.description);
 
   // Redirect if already authenticated
   useEffect(() => {

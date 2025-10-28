@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import ContentArea from "../components/ContentArea";
 import { Card, Badge } from "../components/ui";
 import ProtectedRoute from "../components/ProtectedRoute";
+import { usePageTitle, PAGE_TITLES } from "../hooks/usePageTitle";
 
 function DashboardContent() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -13,6 +14,9 @@ function DashboardContent() {
     servers: 0,
     onlinePlayers: 0
   });
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.dashboard.title, PAGE_TITLES.dashboard.description);
 
   // Mock data for gamenet management
   const gamenetData = [

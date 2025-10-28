@@ -10,6 +10,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { toJalaliDisplay } from '../../utils/jalali';
 import { API_CONFIG } from '../../config/api';
 import Swal from 'sweetalert2';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface Gamenet extends Record<string, unknown> {
   id: string;
@@ -35,6 +36,9 @@ interface GamenetFormData {
 
 function GamenetsPageContent() {
   const { token } = useAuth();
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.gamenets.title, PAGE_TITLES.gamenets.description);
   const [gamenets, setGamenets] = useState<Gamenet[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGamenet, setEditingGamenet] = useState<Gamenet | null>(null);

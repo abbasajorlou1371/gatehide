@@ -6,6 +6,7 @@ import AuthLayout from '../../components/AuthLayout';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getAuthEndpoint } from '../../config/api';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface FormErrors {
   newPassword?: string;
@@ -27,6 +28,9 @@ export default function ResetPasswordPage() {
     newPassword: '',
     confirmPassword: '',
   });
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.resetPassword.title, PAGE_TITLES.resetPassword.description);
 
   // Validate token on component mount
   useEffect(() => {

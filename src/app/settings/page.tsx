@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../utils/api';
 import ProfileSettings from './ProfileSettings';
 import SecuritySettings from './SecuritySettings';
+import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
 interface UserProfile {
   name: string;
@@ -22,6 +23,9 @@ function SettingsPageContent() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  // Set page title
+  usePageTitle(PAGE_TITLES.settings.title, PAGE_TITLES.settings.description);
 
 
   const handleSave = async (profileData: UserProfile) => {
