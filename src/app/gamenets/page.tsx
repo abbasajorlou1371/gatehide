@@ -5,10 +5,13 @@ import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } fro
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import PermissionGuard from '../../components/PermissionGuard';
+import PermissionButton from '../../components/PermissionButton';
 import { apiClient, ApiResponse } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
 import { toJalaliDisplay } from '../../utils/jalali';
 import { API_CONFIG } from '../../config/api';
+import { PERMISSIONS } from '../../types/permission';
 import Swal from 'sweetalert2';
 import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
 
@@ -688,15 +691,17 @@ function GamenetsPageContent() {
           <h1 className="text-2xl sm:text-3xl font-bold gx-gradient-text">مدیریت گیم نت‌ها</h1>
           <p className="text-gray-400 mt-1 text-sm sm:text-base">مدیریت و نظارت بر گیم نت‌های تحت پوشش</p>
         </div>
-        <Button
+        <PermissionButton
+          permission={PERMISSIONS.GAMENETS_CREATE}
           onClick={handleAddGamenet}
           variant="primary"
           size="md"
           className="btn-wave w-full sm:w-auto text-center sm:text-right"
+          disabledMessage="شما دسترسی لازم برای افزودن گیم نت را ندارید"
         >
           <span className="sm:hidden">➕ افزودن</span>
           <span className="hidden sm:inline">➕ افزودن گیم نت</span>
-        </Button>
+        </PermissionButton>
       </div>
 
       {/* Error Display */}
@@ -894,8 +899,10 @@ function GamenetsPageContent() {
 
 export default function GamenetsPage() {
   return (
-    <ProtectedRoute>
-      <GamenetsPageContent />
+    <ProtectedRoute requiredPermission={PERMISSIONS.GAMENETS_VIEW}>
+      <PermissionGuard permission={PERMISSIONS.GAMENETS_VIEW}>
+        <GamenetsPageContent />
+      </PermissionGuard>
     </ProtectedRoute>
   );
 }

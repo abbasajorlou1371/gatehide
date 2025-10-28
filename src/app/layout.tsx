@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Layout from "../components/Layout";
 import { AuthProvider } from "../contexts/AuthContext";
+import PermissionDebugger from "../components/PermissionDebugger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <Layout>
             {children}
           </Layout>
+          <PermissionDebugger />
         </AuthProvider>
       </body>
     </html>

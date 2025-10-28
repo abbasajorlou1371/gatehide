@@ -13,6 +13,7 @@ export class SecurityUtils {
   private static readonly TOKEN_KEY = 'gatehide_token';
   private static readonly USER_KEY = 'gatehide_user';
   private static readonly USER_TYPE_KEY = 'gatehide_user_type';
+  private static readonly PERMISSIONS_KEY = 'gatehide_permissions';
   private static readonly REMEMBER_ME_KEY = 'gatehide_remember_me';
   
   // Security configuration
@@ -61,8 +62,12 @@ export class SecurityUtils {
     if (!this.isClient()) return null;
     
     try {
-      // Try sessionStorage first, then localStorage
-      return sessionStorage.getItem(key) || localStorage.getItem(key);
+      // Check remember me preference to determine which storage to use
+      const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
+      const storage = rememberMe ? localStorage : sessionStorage;
+      
+      // Try the appropriate storage first, then fallback to the other
+      return storage.getItem(key) || (rememberMe ? sessionStorage.getItem(key) : localStorage.getItem(key));
     } catch {
       return this.getMemoryItem(key);
     }
@@ -88,6 +93,7 @@ export class SecurityUtils {
       this.removeToken();
       this.removeUser();
       this.removeUserType();
+      this.removePermissions();
       this.clearMemory();
     } catch (error) {
       console.error('Failed to clear storage:', error);
@@ -185,11 +191,56 @@ export class SecurityUtils {
     this.removeItem(this.USER_TYPE_KEY);
   }
 
+  // Permissions management
+  static setPermissions(permissions: string[], rememberMe: boolean = false): void {
+    this.setItem(this.PERMISSIONS_KEY, JSON.stringify(permissions), rememberMe);
+  }
+
+  static getPermissions(): string[] {
+    const permissionsData = this.getItem(this.PERMISSIONS_KEY);
+    if (!permissionsData) return [];
+    
+    try {
+      return JSON.parse(permissionsData);
+    } catch {
+      return [];
+    }
+  }
+
+  static removePermissions(): void {
+    this.removeItem(this.PERMISSIONS_KEY);
+  }
+
+  // Permission checking methods
+  static hasPermission(permission: string): boolean {
+    const permissions = this.getPermissions();
+    return permissions.includes(permission);
+  }
+
+  static hasAnyPermission(permissions: string[]): boolean {
+    const userPermissions = this.getPermissions();
+    return permissions.some(permission => userPermissions.includes(permission));
+  }
+
+  static hasAllPermissions(permissions: string[]): boolean {
+    const userPermissions = this.getPermissions();
+    return permissions.every(permission => userPermissions.includes(permission));
+  }
+
+  static canAccessResource(resource: string, action: string): boolean {
+    const permissions = this.getPermissions();
+    const specificPermission = `${resource}:${action}`;
+    const wildcardPermission = `${resource}:*`;
+    
+    return permissions.includes(specificPermission) || permissions.includes(wildcardPermission);
+  }
+
   // Clear all authentication data
   static clearAuth(): void {
     this.removeToken();
     this.removeUser();
     this.removeUserType();
+    this.removePermissions();
   }
 
   // Check if user is authenticated
@@ -215,12 +266,17 @@ export class SecurityUtils {
     if (!this.isValidTokenFormat(token)) return true;
     
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Decode base64url (JWT uses base64url, not base64)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const paddedBase64 = base64 + '='.repeat((4 - base64.length % 4) % 4);
+      const payload = JSON.parse(atob(paddedBase64));
+      
       if (!payload.exp) return false; // No expiration, assume valid
       
       const currentTime = Math.floor(Date.now() / 1000);
-      // Add 30 second buffer
-      return payload.exp <= currentTime + 30;
+      // Add 5 minute buffer to prevent premature expiration
+      return payload.exp <= currentTime + 300;
     } catch {
       return true;
     }
@@ -231,7 +287,12 @@ export class SecurityUtils {
     if (!this.isValidTokenFormat(token)) return null;
     
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Decode base64url (JWT uses base64url, not base64)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const paddedBase64 = base64 + '='.repeat((4 - base64.length % 4) % 4);
+      const payload = JSON.parse(atob(paddedBase64));
+      
       if (!payload.exp) return null;
       return new Date(payload.exp * 1000);
     } catch {

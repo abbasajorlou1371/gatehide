@@ -5,10 +5,13 @@ import { Button, Input, Badge, Table, TableColumn, TableAction, Pagination } fro
 import Modal from '../../components/ui/Modal';
 import ContentArea from '../../components/ContentArea';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import PermissionGuard from '../../components/PermissionGuard';
+import PermissionButton from '../../components/PermissionButton';
 import { apiClient, ApiResponse } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
 import { toJalaliDisplay } from '../../utils/jalali';
 import { API_CONFIG } from '../../config/api';
+import { PERMISSIONS } from '../../types/permission';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
 import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
@@ -822,15 +825,17 @@ function UsersPageContent() {
           <h1 className="text-2xl sm:text-3xl font-bold gx-gradient-text">مدیریت کاربران</h1>
           <p className="text-gray-400 mt-1 text-sm sm:text-base">مدیریت و نظارت بر کاربران سیستم</p>
         </div>
-        <Button
+        <PermissionButton
+          permission={PERMISSIONS.USERS_CREATE}
           onClick={handleAddUser}
           variant="primary"
           size="md"
           className="btn-wave w-full sm:w-auto text-center sm:text-right"
+          disabledMessage="شما دسترسی لازم برای افزودن کاربر را ندارید"
         >
           <span className="sm:hidden">➕ افزودن</span>
           <span className="hidden sm:inline">➕ افزودن کاربر جدید</span>
-        </Button>
+        </PermissionButton>
       </div>
 
       {/* Error Display */}
@@ -1077,8 +1082,10 @@ function UsersPageContent() {
 
 export default function UsersPage() {
   return (
-    <ProtectedRoute>
-      <UsersPageContent />
+    <ProtectedRoute requiredPermission={PERMISSIONS.USERS_VIEW}>
+      <PermissionGuard permission={PERMISSIONS.USERS_VIEW}>
+        <UsersPageContent />
+      </PermissionGuard>
     </ProtectedRoute>
   );
 }

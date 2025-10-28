@@ -7,6 +7,7 @@ export interface User {
   last_login_at?: string;
   created_at: string;
   updated_at: string;
+  permissions?: string[];
 }
 
 export interface LoginRequest {
@@ -19,12 +20,14 @@ export interface LoginResponse {
   user_type: 'user' | 'admin' | 'gamenet';
   user: User;
   expires_at: string;
+  permissions?: string[];
 }
 
 export interface AuthState {
   user: User | null;
   token: string | null;
   userType: 'user' | 'admin' | 'gamenet' | null;
+  permissions: string[];
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -34,4 +37,5 @@ export interface AuthContextType extends AuthState {
   logout: () => void;
   refreshToken: () => Promise<void>;
   updateUser: (user: User) => void;
+  updatePermissions: (permissions: string[]) => void;
 }

@@ -6,6 +6,7 @@ import { Table, TableColumn, TableAction, Button, Badge, Modal } from '../../com
 import ContentArea from '../../components/ContentArea';
 import Swal from 'sweetalert2';
 import { usePageTitle, PAGE_TITLES } from '../../hooks/usePageTitle';
+import { PERMISSIONS } from '../../types/permission';
 
 // Device interface
 interface Device extends Record<string, unknown> {
@@ -787,7 +788,7 @@ function DevicesPageContent() {
 
 export default function DevicesPage() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredPermission={PERMISSIONS.RESERVATION_MANAGE}>
       <DevicesPageContent />
     </ProtectedRoute>
   );

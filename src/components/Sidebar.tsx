@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from './ui';
+import { PERMISSIONS } from '../types/permission';
+import { useHasPermission, useHasAnyPermission } from '../hooks/usePermissions';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,8 +13,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
-  // Mock authentication state - replace with actual auth logic
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isFinancialOpen, setIsFinancialOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
@@ -119,6 +118,20 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
     };
   }, [isClient, isOpen, touchStart, touchEnd, onOpen, onClose]);
 
+  // Permission checks for financial dropdown
+  const hasWalletView = useHasPermission(PERMISSIONS.WALLET_VIEW);
+  const hasPaymentsView = useHasPermission(PERMISSIONS.PAYMENTS_VIEW);
+  const hasTransactionsView = useHasPermission(PERMISSIONS.TRANSACTIONS_VIEW);
+  const hasInvoicesView = useHasPermission(PERMISSIONS.INVOICES_VIEW);
+  
+  // Check if user has any financial permissions to show the dropdown
+  const hasAnyFinancialPermission = useHasAnyPermission([
+    PERMISSIONS.WALLET_VIEW,
+    PERMISSIONS.PAYMENTS_VIEW,
+    PERMISSIONS.TRANSACTIONS_VIEW,
+    PERMISSIONS.INVOICES_VIEW,
+  ]);
+
   const menuItems: Array<{
     name: string;
     href?: string;
@@ -126,14 +139,15 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
     hasDropdown?: boolean;
     isOpen?: boolean;
     onToggle?: () => void;
-    children?: Array<{ name: string; href: string; icon: string }>;
+    children?: Array<{ name: string; href: string; icon: string; permission?: string }>;
+    permission?: string;
   }> = [
-    { name: 'داشبورد', href: '/', icon: '📊' },
-    { name: 'گیم نت‌ها', href: '/gamenets', icon: '🎮' },
-    { name: 'رزرو دستگاه‌ها', href: '/reservation', icon: '💻' },
-    { name: 'کاربران', href: '/users', icon: '👥' },
-    { name: 'پلن‌های اشتراک', href: '/subscription-plans', icon: '📋' },
-    { name: 'آمار و تحلیل‌ها', href: '/analytics', icon: '📈' },
+    { name: 'داشبورد', href: '/', icon: '📊', permission: PERMISSIONS.DASHBOARD_VIEW },
+    { name: 'گیم نت‌ها', href: '/gamenets', icon: '🎮', permission: PERMISSIONS.GAMENETS_VIEW },
+    { name: 'رزرو دستگاه‌ها', href: '/reservation', icon: '💻', permission: PERMISSIONS.RESERVATION_MANAGE },
+    { name: 'کاربران', href: '/users', icon: '👥', permission: PERMISSIONS.USERS_VIEW },
+    { name: 'پلن‌های اشتراک', href: '/subscription-plans', icon: '📋', permission: PERMISSIONS.SUBSCRIPTION_PLANS_VIEW },
+    { name: 'آمار و تحلیل‌ها', href: '/analytics', icon: '📈', permission: PERMISSIONS.ANALYTICS_VIEW },
     { 
       name: 'امور مالی', 
       icon: '💰', 
@@ -141,25 +155,94 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
       isOpen: isFinancialOpen,
       onToggle: () => setIsFinancialOpen(!isFinancialOpen),
       children: [
-        { name: 'کیف پول', href: '/wallet', icon: '💎' },
-        { name: 'پرداخت‌ها', href: '/payments', icon: '💳' },
-        { name: 'تراکنش‌ها', href: '/transactions', icon: '📈' },
-        { name: 'فاکتورها', href: '/invoices', icon: '📄' },
+        { name: 'کیف پول', href: '/wallet', icon: '💎', permission: PERMISSIONS.WALLET_VIEW },
+        { name: 'پرداخت‌ها', href: '/payments', icon: '💳', permission: PERMISSIONS.PAYMENTS_VIEW },
+        { name: 'تراکنش‌ها', href: '/transactions', icon: '📈', permission: PERMISSIONS.TRANSACTIONS_VIEW },
+        { name: 'فاکتورها', href: '/invoices', icon: '📄', permission: PERMISSIONS.INVOICES_VIEW },
       ]
     },
-    { name: 'تنظیمات', href: '/settings', icon: '⚙️' },
-    { name: 'پشتیبانی', href: '/support', icon: '💬' },
+    { name: 'تنظیمات', href: '/settings', icon: '⚙️', permission: PERMISSIONS.SETTINGS_MANAGE },
+    { name: 'پشتیبانی', href: '/support', icon: '💬', permission: PERMISSIONS.SUPPORT_ACCESS },
   ];
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    // Add actual login logic here
-  };
+  // Permission checks for individual menu items
+  const hasDashboardView = useHasPermission(PERMISSIONS.DASHBOARD_VIEW);
+  const hasGamenetsView = useHasPermission(PERMISSIONS.GAMENETS_VIEW);
+  const hasReservationManage = useHasPermission(PERMISSIONS.RESERVATION_MANAGE);
+  const hasUsersView = useHasPermission(PERMISSIONS.USERS_VIEW);
+  const hasSubscriptionPlansView = useHasPermission(PERMISSIONS.SUBSCRIPTION_PLANS_VIEW);
+  const hasAnalyticsView = useHasPermission(PERMISSIONS.ANALYTICS_VIEW);
+  const hasSettingsManage = useHasPermission(PERMISSIONS.SETTINGS_MANAGE);
+  const hasSupportAccess = useHasPermission(PERMISSIONS.SUPPORT_ACCESS);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    // Add actual logout logic here
-  };
+  // Filter menu items based on permissions
+  const filteredMenuItems = menuItems.filter((item) => {
+    // If item has no permission requirement, show it
+    if (!item.permission) {
+      return true;
+    }
+    
+    // Check specific permissions
+    switch (item.permission) {
+      case PERMISSIONS.DASHBOARD_VIEW:
+        return hasDashboardView;
+      case PERMISSIONS.GAMENETS_VIEW:
+        return hasGamenetsView;
+      case PERMISSIONS.RESERVATION_MANAGE:
+        return hasReservationManage;
+      case PERMISSIONS.USERS_VIEW:
+        return hasUsersView;
+      case PERMISSIONS.SUBSCRIPTION_PLANS_VIEW:
+        return hasSubscriptionPlansView;
+      case PERMISSIONS.ANALYTICS_VIEW:
+        return hasAnalyticsView;
+      case PERMISSIONS.SETTINGS_MANAGE:
+        return hasSettingsManage;
+      case PERMISSIONS.SUPPORT_ACCESS:
+        return hasSupportAccess;
+      default:
+        return true;
+    }
+  }).map((item) => {
+    // Filter children based on permissions if it's a dropdown
+    if (item.hasDropdown && item.children) {
+      return {
+        ...item,
+        children: item.children.filter((child) => {
+          if (!child.permission) {
+            return true;
+          }
+          
+          // Check specific child permissions
+          switch (child.permission) {
+            case PERMISSIONS.WALLET_VIEW:
+              return hasWalletView;
+            case PERMISSIONS.PAYMENTS_VIEW:
+              return hasPaymentsView;
+            case PERMISSIONS.TRANSACTIONS_VIEW:
+              return hasTransactionsView;
+            case PERMISSIONS.INVOICES_VIEW:
+              return hasInvoicesView;
+            default:
+              return true;
+          }
+        })
+      };
+    }
+    return item;
+  }).filter((item) => {
+    // Hide dropdown if it has no visible children
+    if (item.hasDropdown && item.children && item.children.length === 0) {
+      return false;
+    }
+    
+    // Hide financial dropdown if user has no financial permissions
+    if (item.name === 'امور مالی' && !hasAnyFinancialPermission) {
+      return false;
+    }
+    
+    return true;
+  });
 
   const isActiveRoute = (href: string) => {
     if (href === '/') {
@@ -227,7 +310,7 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
 
           {/* Navigation (scrollable) */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto scrollbar-thin">
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               if (item.hasDropdown) {
                 const isActive = isFinancialActive();
                 return (
@@ -264,7 +347,10 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
                     {/* Dropdown Items */}
                     {item.isOpen && (
                       <div className="mr-8 space-y-1">
-                        {item.children?.map((child) => {
+                        {item.children?.filter(() => {
+                          // For now, show all children - permission filtering will be handled by ProtectedRoute
+                          return true;
+                        }).map((child) => {
                           const isChildActive = isActiveRoute(child.href);
                           return (
                             <Link
@@ -324,30 +410,6 @@ export default function Sidebar({ isOpen, onClose, onOpen }: SidebarProps) {
             })}
           </nav>
 
-          {/* Sidebar Footer (fixed to bottom) */}
-          <div className="border-t border-gray-600 p-4 sticky bottom-0 gx-glass">
-            {!isAuthenticated ? (
-              <Button 
-                onClick={handleLogin}
-                variant="primary"
-                fullWidth
-                size="md"
-                className="btn-wave"
-              >
-                ورود
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleLogout}
-                variant="outline"
-                fullWidth
-                size="md"
-                className="btn-wave"
-              >
-                خروج
-              </Button>
-            )}
-          </div>
         </div>
       </div>
     </>

@@ -138,6 +138,11 @@ class ApiClient {
           errorMessage = 'احراز هویت نامعتبر است';
         } else if (response.status === 403) {
           errorMessage = 'دسترسی غیرمجاز';
+          // For 403 errors, redirect to forbidden page if in browser
+          if (typeof window !== 'undefined') {
+            const permissionParam = errorData.permission || errorData.required_permission || '';
+            window.location.href = `/forbidden?permission=${encodeURIComponent(permissionParam)}`;
+          }
         } else if (response.status === 404) {
           errorMessage = 'منبع یافت نشد';
         } else if (response.status === 429) {
@@ -210,9 +215,10 @@ class ApiClient {
     try {
       return await this.makeRequest<ApiResponse<{
         token: string;
-        user_type: 'user' | 'admin';
+        user_type: 'user' | 'admin' | 'gamenet';
         user: User;
         expires_at: string;
+        permissions?: string[];
       }>>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
@@ -246,7 +252,11 @@ class ApiClient {
 
   // Protected methods (authentication required)
   async getProfile(token: string) {
-    return this.makeRequest<ApiResponse<User>>('/profile', {
+    return this.makeRequest<ApiResponse<{
+      user: User;
+      user_type: 'user' | 'admin' | 'gamenet';
+      permissions: string[];
+    }>>('/profile', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -452,6 +462,42 @@ class ApiClient {
 
       // Send request
       xhr.send(options.body as XMLHttpRequestBodyInit | null);
+    });
+  }
+
+  // Permission-related methods
+  async getUserPermissions(token: string) {
+    return this.makeRequest<ApiResponse<{ permissions: string[] }>>('/permissions', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async checkPermission(token: string, permission: string) {
+    return this.makeRequest<ApiResponse<{ has_permission: boolean }>>(`/permissions/check`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ permission }),
+    });
+  }
+
+  async checkMultiplePermissions(token: string, permissions: string[]) {
+    return this.makeRequest<ApiResponse<{ 
+      has_all: boolean; 
+      has_any: boolean; 
+      results: Record<string, boolean> 
+    }>>(`/permissions/check-multiple`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ permissions }),
     });
   }
 

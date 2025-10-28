@@ -13,6 +13,7 @@ const initialState: AuthState = {
   user: null,
   token: null,
   userType: null,
+  permissions: [],
   isAuthenticated: false,
   isLoading: true,
 };
@@ -20,11 +21,12 @@ const initialState: AuthState = {
 // Action types
 type AuthAction =
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string; userType: 'user' | 'admin' | 'gamenet' } }
+  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string; userType: 'user' | 'admin' | 'gamenet'; permissions: string[] } }
   | { type: 'LOGIN_FAILURE' }
   | { type: 'LOGOUT' }
   | { type: 'REFRESH_TOKEN'; payload: { token: string } }
   | { type: 'UPDATE_USER'; payload: { user: User } }
+  | { type: 'UPDATE_PERMISSIONS'; payload: { permissions: string[] } }
   | { type: 'SET_LOADING'; payload: { isLoading: boolean } };
 
 // Reducer
@@ -41,6 +43,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: action.payload.user,
         token: action.payload.token,
         userType: action.payload.userType,
+        permissions: action.payload.permissions,
         isAuthenticated: true,
         isLoading: false,
       };
@@ -59,6 +62,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: null,
         token: null,
         userType: null,
+        permissions: [],
         isAuthenticated: false,
         isLoading: false,
       };
@@ -71,6 +75,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: action.payload.user,
+        permissions: action.payload.user.permissions || state.permissions,
+      };
+    case 'UPDATE_PERMISSIONS':
+      return {
+        ...state,
+        permissions: action.payload.permissions,
       };
     case 'SET_LOADING':
       return {
@@ -98,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const token = SecurityUtils.getToken();
         const userData = SecurityUtils.getUser();
         const userType = SecurityUtils.getUserType();
+        const permissions = SecurityUtils.getPermissions();
 
         if (token && userData && userType) {
           // Check if token is expired
@@ -108,24 +119,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
 
-          // Verify token is still valid by fetching profile
-          try {
-            const profileResponse = await apiClient.getProfile(token);
-            
-            dispatch({
-              type: 'LOGIN_SUCCESS',
-              payload: {
-                user: profileResponse.data,
-                token,
-                userType,
-              },
-            });
-          } catch (error) {
-            // Token is invalid, clear storage
-            if (isDevelopment) console.error('Token validation failed:', error);
-            SecurityUtils.clearAuth();
-            dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
+        // Verify token is still valid by fetching profile
+        try {
+          const profileResponse = await apiClient.getProfile(token);
+          
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: {
+              user: profileResponse.data.user,
+              token,
+              userType: profileResponse.data.user_type,
+              permissions: profileResponse.data.permissions || permissions || [],
+            },
+          });
+        } catch (error) {
+          // Token is invalid, clear storage
+          if (isDevelopment) {
+            console.error('Token validation failed:', error);
+            console.log('Token:', token.substring(0, 20) + '...');
+            console.log('User data:', userData);
+            console.log('User type:', userType);
           }
+          SecurityUtils.clearAuth();
+          dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
+        }
         } else {
           dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
         }
@@ -147,8 +164,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkInterval = setInterval(async () => {
       if (!state.token) return;
       
-      // Check if token is expiring soon (within 5 minutes)
-      if (SecurityUtils.isTokenExpiringSoon(state.token)) {
+      // Check if token is expiring soon (within 10 minutes)
+      if (SecurityUtils.isTokenExpiringSoon(state.token, 10 * 60 * 1000)) {
         if (isDevelopment) console.log('Token expiring soon, refreshing...');
         
         try {
@@ -190,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       SecurityUtils.setToken(response.data.token, rememberMe);
       SecurityUtils.setUser(response.data.user, rememberMe);
       SecurityUtils.setUserType(response.data.user_type, rememberMe);
+      SecurityUtils.setPermissions(response.data.permissions || [], rememberMe);
       
       // Clear login attempts on successful login
       SecurityUtils.clearLoginAttempts();
@@ -200,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user: response.data.user,
           token: response.data.token,
           userType: response.data.user_type,
+          permissions: response.data.permissions || [],
         },
       });
     } catch (error) {
@@ -276,6 +295,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const rememberMe = SecurityUtils.getRememberMe();
     dispatch({ type: 'UPDATE_USER', payload: { user } });
     SecurityUtils.setUser(user, rememberMe);
+    if (user.permissions) {
+      SecurityUtils.setPermissions(user.permissions, rememberMe);
+    }
+  };
+
+  const updatePermissions = (permissions: string[]) => {
+    const rememberMe = SecurityUtils.getRememberMe();
+    dispatch({ type: 'UPDATE_PERMISSIONS', payload: { permissions } });
+    SecurityUtils.setPermissions(permissions, rememberMe);
   };
 
   const contextValue: AuthContextType = {
@@ -284,6 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshToken,
     updateUser,
+    updatePermissions,
   };
 
   return (
