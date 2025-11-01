@@ -11,6 +11,11 @@ const publicRoutes = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // Allow .txt files for license verification
+  if (pathname.endsWith('.txt')) {
+    return NextResponse.next();
+  }
+  
   // Check if it's a public route
   const isPublicRoute = publicRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
